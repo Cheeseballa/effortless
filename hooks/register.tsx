@@ -2651,7 +2651,7 @@ type UpdateCard = { stage: 'offer' | 'updating' | 'done' | 'failed'; version: st
 
 /** Whether version `a` is newer than `b`, both `major.minor.patch`. */
 export function isNewer(a: string, b: string): boolean {
-  const pa = a.split('.').map(Number), pb = b.split('.').map(Number)
+  const pa = a.split('.').map(n => parseInt(n, 10)), pb = b.split('.').map(n => parseInt(n, 10))
   for (let i = 0; i < 3; i++) if ((pa[i] ?? 0) !== (pb[i] ?? 0)) return (pa[i] ?? 0) > (pb[i] ?? 0)
   return false
 }

@@ -3426,6 +3426,8 @@ describe('updates', () => {
     expect(isNewer('1.36.0', '1.35.99')).toBe(true)
     expect(isNewer('1.35.9', '1.35.10')).toBe(false)
     expect(isNewer('1.35.79', '1.35.79')).toBe(false)
+    expect(isNewer('1.71.0', '1.71.0-hub')).toBe(false)
+    expect(isNewer('1.71.1', '1.71.0-hub')).toBe(true)
     expect(latestRelease('[{"version":"1.2.3","note":"x"},{"version":"1.2.2"}]')).toEqual({ version: '1.2.3', note: 'x' })
     expect(latestRelease('not json')).toBeUndefined()
     expect(latestRelease('[{"version":"latest"}]')).toBeUndefined()
