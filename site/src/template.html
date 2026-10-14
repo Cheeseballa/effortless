@@ -375,7 +375,9 @@ button.btn:focus-visible,.sel select:focus-visible{outline:2px solid var(--accen
 .cubit{overflow-x:clip;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.45fr);align-items:center;gap:40px;padding:80px var(--frame) 120px;max-width:1180px;margin:0 auto}
 .cu-kicker{margin:0;color:var(--accent);font:600 12.5px ui-monospace,monospace;letter-spacing:.14em;text-transform:uppercase}
 .cubit h2{white-space:nowrap;margin:10px 0 0;font:500 clamp(28px,3.3vw,46px)/1.08 var(--display);letter-spacing:-.025em;color:#f4f2ff}
-.cubit h2 .cu-logo{display:inline-block;height:1.12em;width:auto;margin-left:.16em;vertical-align:-.2em}
+.cubit{--cubit:#f4a9c9}
+.cubit.blue{--cubit:#b4e8f7}
+.cubit h2 .cu-logo{display:inline-block;height:1.12em;aspect-ratio:1325 / 480;margin-left:.16em;vertical-align:-.2em;background:var(--cubit);-webkit-mask:var(--logo) center/contain no-repeat;mask:var(--logo) center/contain no-repeat}
 .cubit .lead{margin:12px 0 26px}
 .cu-btn{display:inline-flex;align-items:center;height:46px;padding:0 20px;border-radius:10px;background:var(--accent);color:#15121f;font:600 16px var(--sans,system-ui);text-decoration:none}
 .cu-btn:hover{filter:brightness(1.08)}
@@ -740,7 +742,7 @@ button.btn:focus-visible,.sel select:focus-visible{outline:2px solid var(--accen
   <section class="cubit" id="cubit" aria-labelledby="cu-h">
     <div class="cu-text">
       <p class="cu-kicker">Meanwhile, in another dimension</p>
-      <h2 id="cu-h">Also building <img class="cu-logo" src="assets/cubit-logo-white.svg" alt="Cubit"></h2>
+      <h2 id="cu-h">Also building <span class="cu-logo" role="img" aria-label="Cubit" style="--logo:url(assets/cubit-logo-white.svg)"></span></h2>
       <p class="lead">Send anything to anyone, anywhere.</p>
       <a class="cu-btn" href="https://heycubit.com" rel="noopener">Join the waitlist</a>
     </div>
@@ -1000,6 +1002,7 @@ var Dash=(function(){
   var cvs = document.getElementById('rip-peek'); if (!cvs) return;
   // His colour: pink pops on the blue sky; ?cubit=blue shows the other one.
   var COLOUR = (location.search.match(/cubit=(blue|pink)/) || [])[1] || 'pink';
+  if (COLOUR === 'blue') document.getElementById('cubit').classList.add('blue');
   var rip = cvs.parentNode, still = matchMedia('(prefers-reduced-motion: reduce)').matches;
   var MOODS = ['calm', 'happy', 'curious'], mood = Math.floor(Math.random() * 3), vids = {};
   // The clips are made for this hole: a 1320x1200 frame whose rows 300..1200 are the hole, edge to edge. He rises from
