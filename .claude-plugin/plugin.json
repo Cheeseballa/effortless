@@ -65,6 +65,25 @@
         "max"
       ]
     },
+    "floorFolders": {
+      "type": "string",
+      "title": "Folders with a higher floor",
+      "description": "Comma-separated folder names. In a chat whose folder path contains one, Auto never picks below the folder floor.",
+      "default": "claude-projects,The-Hub"
+    },
+    "folderFloor": {
+      "type": "string",
+      "title": "Never below, in those folders",
+      "description": "The floor inside the folders above, when it is higher than Never below.",
+      "default": "medium",
+      "options": [
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "max"
+      ]
+    },
     "effortCeiling": {
       "type": "string",
       "title": "Never above",

@@ -1,7 +1,7 @@
 import { describe, expect, mock, test as baseTest } from 'claude-code/testing'
 import type { On } from 'claude-code'
 import type { Engine } from 'claude-code/testing'
-import { helperFloor, namedEffort, hotVisible, looksLikeRedo, REDO_STAY_PROMPTS, routeWorth, syncPlan, tipped, bounded, handoffEvidence, parseHandoffAnswer, withJevKey, parseVerdict, capped, resetLabel, HANDOFF_PROMPT, handoffMessage, withAttachments, endsOnQuestion, keepsEffort, benchGrade, benchReport, judgeFailure, contextFrom, readConfig, asSpent, cacheColor, cacheLabel, cacheClock, cacheSafe, cacheTtlOf, mostlyCached, isFollowUp, parseJevAnswer, parseJevKey, savedText, forkOutcome, setupNext, setupBack, setupCounter, dashboardLines, flashColor, handoffGlowStep, weighted, handoffLook, isNewer, latestRelease, updateSnoozed, updateFailure, claudeCandidates, noClaudeHint, compactTranscript, judgeGlowSvg, judgeGlowAt, judgeBrightnessAt, JUDGE_RISE_MS, JUDGE_FADE_MS, JUDGE_STEP_MS, JUDGE_PIECE_MS } from '../hooks/register'
+import { floorIn, helperFloor, namedEffort, hotVisible, looksLikeRedo, REDO_STAY_PROMPTS, routeWorth, syncPlan, tipped, bounded, handoffEvidence, parseHandoffAnswer, withJevKey, parseVerdict, capped, resetLabel, HANDOFF_PROMPT, handoffMessage, withAttachments, endsOnQuestion, keepsEffort, benchGrade, benchReport, judgeFailure, contextFrom, readConfig, asSpent, cacheColor, cacheLabel, cacheClock, cacheSafe, cacheTtlOf, mostlyCached, isFollowUp, parseJevAnswer, parseJevKey, savedText, forkOutcome, setupNext, setupBack, setupCounter, dashboardLines, flashColor, handoffGlowStep, weighted, handoffLook, isNewer, latestRelease, updateSnoozed, updateFailure, claudeCandidates, noClaudeHint, compactTranscript, judgeGlowSvg, judgeGlowAt, judgeBrightnessAt, JUDGE_RISE_MS, JUDGE_FADE_MS, JUDGE_STEP_MS, JUDGE_PIECE_MS } from '../hooks/register'
 import { ART_COLUMNS, artFrame, artPixel, MOVING } from '../hooks/art'
 import { isLight, lightHex, lightProps, setLight, setTheme, themedEls, themedSvg, tint, tintHex } from '../hooks/theme'
 import { importsOf, moduleLinks, moduleOf, relPath, withTouch } from '../hooks/agents'
@@ -1132,6 +1132,21 @@ describe('judge choice (plugin settings)', () => {
   const chat = (content: string) =>
     JSON.stringify({ choices: [{ message: { content } }], usage: { prompt_tokens: 300, completion_tokens: 20 } })
 
+  test('floorIn: the folder floor applies inside a listed folder, on any path style and case', () => {
+    const c = readConfig({})
+    expect(floorIn('C:\\Users\\me\\Documents\\GitHub\\claude-projects', c)).toBe('medium')
+    expect(floorIn('/home/me/The-Hub/Cheeseballa/site', c)).toBe('medium')
+    expect(floorIn('C:/x/the-hub', c)).toBe('medium')
+    expect(floorIn('C:\\Users\\me\\Documents\\GitHub\\effortless', c)).toBe('low')
+    expect(floorIn('', c)).toBe('low')
+    expect(floorIn('/x/claude-projects-old', c)).toBe('low')
+    // Never lowers a higher usual floor, and an empty list turns it off.
+    expect(floorIn('/x/claude-projects', readConfig({ effortFloor: 'high' }))).toBe('high')
+    expect(floorIn('/x/claude-projects', readConfig({ floorFolders: '' }))).toBe('low')
+    expect(readConfig({ floorFolders: ' a , ,b ', folderFloor: 'xhigh' })).toMatchObject({ floorFolders: ['a', 'b'], folderFloor: 'xhigh' })
+    expect(readConfig({ folderFloor: 'huge' }).folderFloor).toBe('medium')
+  })
+
   test('readConfig: an unknown or empty judge is auto, values are trimmed', () => {
     expect(readConfig(undefined).judge).toBe('auto')
     expect(readConfig({ judge: 'gpt' }).judge).toBe('auto')
@@ -1146,6 +1161,8 @@ describe('judge choice (plugin settings)', () => {
       bias: 0,
       floor: 'low',
       ceiling: 'max',
+      floorFolders: ['claude-projects', 'The-Hub'],
+      folderFloor: 'medium',
       hide: ['reason'],
       swampAt: 70,
       layout: 'default',

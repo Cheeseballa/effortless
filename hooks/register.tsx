@@ -604,6 +604,10 @@ export type JudgeConfig = {
   floor: Effort
   /** Auto never goes above this effort. */
   ceiling: Effort
+  /** Folder names (any part of the chat's folder path, any case) where Auto never goes below folderFloor. */
+  floorFolders: string[]
+  /** The floor inside floorFolders, when it is higher than the usual floor. */
+  folderFloor: Effort
   /** What the person switched off: the footer's handoff button and any of the alert bands. */
   hide: Hideable[]
   /** The swamp band shows once the context fills this share of the window, in percent. */
@@ -642,6 +646,8 @@ let config: JudgeConfig = {
   bias: 0,
   floor: 'low',
   ceiling: 'max',
+  floorFolders: ['claude-projects', 'The-Hub'],
+  folderFloor: 'medium',
   hide: ['reason'],
   swampAt: 70,
   layout: 'default',
@@ -666,6 +672,12 @@ export function readConfig(options: unknown): JudgeConfig {
     bias: Math.max(-2, Math.min(2, Math.round(Number(str(o.effortBias)) || 0))),
     floor: EFFORTS.includes(str(o.effortFloor) as Effort) ? (str(o.effortFloor) as Effort) : 'low',
     ceiling: EFFORTS.includes(str(o.effortCeiling) as Effort) ? (str(o.effortCeiling) as Effort) : 'max',
+    // The group hub's folder names by default: its startup and push routines are long checklists that low effort rushes.
+    floorFolders: (o.floorFolders === undefined ? 'claude-projects,The-Hub' : str(o.floorFolders))
+      .split(',')
+      .map(part => part.trim())
+      .filter(Boolean),
+    folderFloor: EFFORTS.includes(str(o.folderFloor) as Effort) ? (str(o.folderFloor) as Effort) : 'medium',
     swampAt: SWAMP_STEPS.includes(Number(str(o.swampAt)) as (typeof SWAMP_STEPS)[number]) ? Number(str(o.swampAt)) : 70,
     layout: str(o.layout) === 'minimal' ? 'minimal' : 'default',
     compactWith: str(o.compactWith) === 'session' ? 'session' : 'haiku',
@@ -1378,6 +1390,13 @@ export function bounded(effort: Effort, floor: Effort, ceiling: Effort): Effort 
   const lo = EFFORTS.indexOf(floor)
   const hi = Math.max(lo, EFFORTS.indexOf(ceiling))
   return EFFORTS[Math.max(lo, Math.min(hi, EFFORTS.indexOf(effort)))]
+}
+
+/** The floor for a chat in `root`: the folder floor when any part of the path is one of floorFolders, else the usual one. */
+export function floorIn(root: string, c: Pick<JudgeConfig, 'floor' | 'floorFolders' | 'folderFloor'>): Effort {
+  const names = c.floorFolders.map(n => n.toLowerCase())
+  const inside = root.split(/[\\/]/).some(part => part && names.includes(part.toLowerCase()))
+  return inside && EFFORTS.indexOf(c.folderFloor) > EFFORTS.indexOf(c.floor) ? c.folderFloor : c.floor
 }
 
 /** Save mode caps what Auto picks at medium; a higher pick comes down to it. */
@@ -3647,7 +3666,8 @@ async function helperEffort($: EngineInterface, prompt: string, type: string): P
   if (!verdict || verdict.why === UNSURE) return null
   const saving = (await read($, saveUntil)) !== null
   const leaned = tipped(verdict.effort, verdict.sure, config.bias)
-  const effort = capped(bounded(leaned, helperFloor(config.floor, config.ceiling), config.ceiling), saving)
+  const floor = floorIn(await $.session.root().catch(() => ''), config)
+  const effort = capped(bounded(leaned, helperFloor(floor, config.ceiling), config.ceiling), saving)
   return { ...verdict, effort, why: effort !== leaned && EFFORTS.indexOf(leaned) < EFFORTS.indexOf(effort) ? `${verdict.why} (helpers start at medium)` : verdict.why }
 }
 
@@ -4128,7 +4148,8 @@ Saved to ${out}.md and .json` }
         // reloads the context, so with Auto on for model it is only suggested.
         if (wantsEffort) {
           const saving = (await read($, saveUntil)) !== null
-          const leaned = bounded(tipped(verdict.effort, verdict.sure, config.bias), config.floor, config.ceiling)
+          const floor = floorIn(await $.session.root().catch(() => ''), config)
+          const leaned = bounded(tipped(verdict.effort, verdict.sure, config.bias), floor, config.ceiling)
           const effort = capped(leaned, saving)
           const why = effort !== leaned ? 'save mode' : leaned !== verdict.effort ? 'your settings' : verdict.why
           const applied: Pick = { ...verdict, model: inUse, effort, why }
