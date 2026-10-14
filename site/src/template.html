@@ -1000,18 +1000,16 @@ var Dash=(function(){
   var cvs = document.getElementById('rip-peek'); if (!cvs) return;
   var rip = cvs.parentNode, still = matchMedia('(prefers-reduced-motion: reduce)').matches;
   var MOODS = ['calm', 'happy', 'curious'], mood = Math.floor(Math.random() * 3), vids = {};
-  // Where he goes: his settled centre is at 63% / 50% of the 900 px frame, and he is 60% of its height.
+  // The clips are made for this hole: a 1320x1200 frame whose rows 300..1200 are the hole, edge to edge. He rises from
+  // behind the bottom rim on the right and never crosses the side rims, so the canvas maps 1:1 onto the rip.
   function place() {
-    var W = rip.clientWidth, H = rip.clientHeight, C = Math.round(H * 1.12);
-    var left = Math.round(W * 0.60 - C * 0.63), top = Math.round(H * 0.36 - C * 0.5);
-    cvs.style.width = C + 'px'; cvs.style.height = C + 'px'; cvs.style.left = left + 'px'; cvs.style.top = top + 'px';
-    // Mask layer 1: the hole, laid over the rip. Layer 2: the band above the hole's top, over its middle and right.
-    var bandX = W * 0.22 - left, bandW = W * 0.9, bandH = H * 0.2 - top;
-    var pos = (-left) + 'px ' + (-top) + 'px, ' + bandX + 'px 0px', size = W + 'px ' + H + 'px, ' + bandW + 'px ' + bandH + 'px';
+    var W = rip.clientWidth, s = W / 1320, C = Math.round(1200 * s), top = Math.round(-300 * s);
+    cvs.style.width = W + 'px'; cvs.style.height = C + 'px'; cvs.style.left = '0px'; cvs.style.top = top + 'px';
+    var pos = '0px ' + (-top) + 'px, 0px 0px', size = W + 'px ' + rip.clientHeight + 'px, ' + W + 'px ' + (-top) + 'px';
     cvs.style.webkitMaskPosition = pos; cvs.style.maskPosition = pos; cvs.style.webkitMaskSize = size; cvs.style.maskSize = size;
   }
   place(); addEventListener('resize', place);
-  if (still) return;
+  if (still) { cvs.outerHTML = '<img class="rip-peek" style="' + cvs.getAttribute('style') + '" src="assets/cubit/hole-peek-calm-blue-still.png" alt="">'; return; }
   var gl = cvs.getContext('webgl', { premultipliedAlpha: true, alpha: true }); if (!gl) return;
   function sh(t, src) { var o = gl.createShader(t); gl.shaderSource(o, src); gl.compileShader(o); return o; }
   var prog = gl.createProgram();
@@ -1026,7 +1024,7 @@ var Dash=(function(){
   gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
   function video(name) {
     if (vids[name]) return vids[name];
-    var v = document.createElement('video'); v.src = 'assets/cubit/site-peek-' + name + '-lilac-packed.mp4'; v.muted = true; v.playsInline = true; v.preload = 'auto';
+    var v = document.createElement('video'); v.src = 'assets/cubit/hole-peek-' + name + '-blue-packed.mp4'; v.muted = true; v.playsInline = true; v.preload = 'auto';
     v.addEventListener('ended', function () { draw(v); if (seen) again = setTimeout(next, 3500); });
     return (vids[name] = v);
   }
