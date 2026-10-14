@@ -371,6 +371,21 @@ button.btn:focus-visible,.sel select:focus-visible{outline:2px solid var(--accen
 .btn.pick:after{content:"";width:5px;height:5px;margin:-3px 1px 0 2px;border-right:1.5px solid var(--muted);border-bottom:1.5px solid var(--muted);transform:rotate(45deg)}
 
 /* ---------- Install ---------- */
+/* Cubit breaks through: a torn hole in square pixels, Cubit's own sky inside, the real Cubit leaning out over its top. */
+.cubit{overflow-x:clip;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.45fr);align-items:center;gap:40px;padding:80px var(--frame) 120px;max-width:1180px;margin:0 auto}
+.cu-kicker{margin:0;color:var(--accent);font:600 12.5px ui-monospace,monospace;letter-spacing:.14em;text-transform:uppercase}
+.cubit h2{white-space:nowrap;margin:10px 0 0;font:500 clamp(28px,3.3vw,46px)/1.08 var(--display);letter-spacing:-.025em;color:#f4f2ff}
+.cubit{--cubit:#b4e8f7}
+.cubit h2 .cu-logo{display:inline-block;height:1.12em;aspect-ratio:1325 / 480;margin-left:.16em;vertical-align:-.2em;background:var(--cubit);-webkit-mask:var(--logo) center/contain no-repeat;mask:var(--logo) center/contain no-repeat}
+.cubit .lead{margin:12px 0 26px}
+.cu-btn{display:inline-flex;align-items:center;height:46px;padding:0 20px;border-radius:10px;background:var(--accent);color:#15121f;font:600 16px var(--sans,system-ui);text-decoration:none}
+.cu-btn:hover{filter:brightness(1.08)}
+.rip{position:relative;width:100%;aspect-ratio:44 / 30;--ripmask:url("assets/cubit/rip-hole.svg")}
+.rip-hole,.rip-edge{position:absolute;inset:0}
+.rip-hole{background:url("assets/cubit/sky-flat-1x.webp") center/cover,linear-gradient(180deg,#7fbcd3,rgb(81,150,176));-webkit-mask:var(--ripmask) center/100% 100% no-repeat;mask:var(--ripmask) center/100% 100% no-repeat}
+.rip-edge{background:url("assets/cubit/rip-edge.svg") center/100% 100% no-repeat;filter:drop-shadow(0 0 10px #a79cf766);pointer-events:none}
+.rip-peek{position:absolute;pointer-events:none;-webkit-mask-image:var(--ripmask),linear-gradient(#000,#000);mask-image:var(--ripmask),linear-gradient(#000,#000);-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat}
+@media (max-width:860px){.cubit{grid-template-columns:minmax(0,1fr);text-align:center}}
 .inst-sec{padding:120px var(--frame) 40px;scroll-margin-top:40px}
 .inst-sec h2{margin:0;font:500 clamp(30px,3.8vw,46px)/1.1 var(--display);letter-spacing:-.02em;color:#f4f2ff}
 .inst-sec .lead{margin:14px 0 0;max-width:34em;color:var(--muted);font-size:17px;line-height:1.55}
@@ -645,7 +660,7 @@ button.btn:focus-visible,.sel select:focus-visible{outline:2px solid var(--accen
       <p class="kind"><img src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%20248%20248%22%3E%3Cstyle%3Esvg%7Bbackground%3Atransparent%3Bdisplay%3Ablock%7D%3C%2Fstyle%3E%3Cpath%20d%3D%22M52.4285%20162.873L98.7844%20136.879L99.5485%20134.602L98.7844%20133.334H96.4921L88.7237%20132.862L62.2346%20132.153L39.3113%20131.207L17.0249%20130.026L11.4214%20128.844L6.2%20121.873L6.7094%20118.447L11.4214%20115.257L18.171%20115.847L33.0711%20116.911L55.485%20118.447L71.6586%20119.392L95.728%20121.873H99.5485L100.058%20120.337L98.7844%20119.392L97.7656%20118.447L74.5877%20102.732L49.4995%2086.1905L36.3823%2076.62L29.3779%2071.7757L25.8121%2067.2858L24.2839%2057.3608L30.6515%2050.2716L39.3113%2050.8623L41.4763%2051.4531L50.2636%2058.1879L68.9842%2072.7209L93.4357%2090.6804L97.0015%2093.6343L98.4374%2092.6652L98.6571%2091.9801L97.0015%2089.2625L83.757%2065.2772L69.621%2040.8192L63.2534%2030.6579L61.5978%2024.632C60.9565%2022.1032%2060.579%2020.0111%2060.579%2017.4246L67.8381%207.49965L71.9133%206.19995L81.7193%207.49965L85.7946%2011.0443L91.9074%2024.9865L101.714%2046.8451L116.996%2076.62L121.453%2085.4816L123.873%2093.6343L124.764%2096.1155H126.292V94.6976L127.566%2077.9197L129.858%2057.3608L132.15%2030.8942L132.915%2023.4505L136.608%2014.4708L143.994%209.62643L149.725%2012.344L154.437%2019.0788L153.8%2023.4505L150.998%2041.6463L145.522%2070.1215L141.957%2089.2625H143.994L146.414%2086.7813L156.093%2074.0206L172.266%2053.698L179.398%2045.6635L187.803%2036.802L193.152%2032.5484H203.34L210.726%2043.6549L207.415%2055.1159L196.972%2068.3492L188.312%2079.5739L175.896%2096.2095L168.191%20109.585L168.882%20110.689L170.738%20110.53L198.755%20104.504L213.91%20101.787L231.994%2098.7149L240.144%20102.496L241.036%20106.395L237.852%20114.311L218.495%20119.037L195.826%20123.645L162.07%20131.592L161.696%20131.893L162.137%20132.547L177.36%20133.925L183.855%20134.279H199.774L229.447%20136.524L237.215%20141.605L241.8%20147.867L241.036%20152.711L229.065%20158.737L213.019%20154.956L175.45%20145.977L162.587%20142.787H160.805V143.85L171.502%20154.366L191.242%20172.089L215.82%20195.011L217.094%20200.682L213.91%20205.172L210.599%20204.699L188.949%20188.394L180.544%20181.069L161.696%20165.118H160.422V166.772L164.752%20173.152L187.803%20207.771L188.949%20218.405L187.294%20221.832L181.308%20223.959L174.813%20222.777L161.187%20203.754L147.305%20182.486L136.098%20163.345L134.745%20164.2L128.075%20235.42L125.019%20239.082L117.887%20241.8L111.902%20237.31L108.718%20229.984L111.902%20215.452L115.722%20196.547L118.779%20181.541L121.58%20162.873L123.291%20156.636L123.14%20156.219L121.773%20156.449L107.699%20175.752L86.304%20204.699L69.3663%20222.777L65.291%20224.431L58.2867%20220.768L58.9235%20214.27L62.8713%20208.48L86.304%20178.705L100.44%20160.155L109.551%20149.507L109.462%20147.967L108.959%20147.924L46.6977%20188.512L35.6182%20189.93L30.7788%20185.44L31.4156%20178.115L33.7079%20175.752L52.4285%20162.873Z%22%20fill%3D%22%23ffffff%22%2F%3E%3C%2Fsvg%3E" alt="" width="22" height="22">A Claude Code mod</p>
       <p class="lede">One bar that picks the effort for every prompt. 21% cheaper than Opus at medium, same answers.</p>
       <div class="cta">
-        <a class="gh" href="https://github.com/HeyCubit/effortless"><svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg><span>Star on GitHub</span><span class="stars">126</span></a>
+        <a class="gh" href="https://github.com/HeyCubit/effortless"><svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg><span>Star on GitHub</span><span class="stars">177</span></a>
         <a class="ghost" href="#install">Install<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
       </div>
       <div class="demo" aria-hidden="true">
@@ -721,6 +736,20 @@ button.btn:focus-visible,.sel select:focus-visible{outline:2px solid var(--accen
     <p class="lead">Runs on your own Claude login. No API key needed.</p>
     <p class="solo"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="4" width="19" height="16" rx="3" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 4v16" stroke="currentColor" stroke-width="1.6"/><path d="M4 21L20 3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span><b>One chat at a time.</b>This is a Claude Code limitation: in split view, mods like effortless only show in the left pane. Put the chat you want effortless in on the left.</span></p><div class="ways"><div class="way way-claude"><p class="way-k"><img src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%20248%20248%22%3E%3Cstyle%3Esvg%7Bbackground%3Atransparent%3Bdisplay%3Ablock%7D%3C%2Fstyle%3E%3Cpath%20d%3D%22M52.4285%20162.873L98.7844%20136.879L99.5485%20134.602L98.7844%20133.334H96.4921L88.7237%20132.862L62.2346%20132.153L39.3113%20131.207L17.0249%20130.026L11.4214%20128.844L6.2%20121.873L6.7094%20118.447L11.4214%20115.257L18.171%20115.847L33.0711%20116.911L55.485%20118.447L71.6586%20119.392L95.728%20121.873H99.5485L100.058%20120.337L98.7844%20119.392L97.7656%20118.447L74.5877%20102.732L49.4995%2086.1905L36.3823%2076.62L29.3779%2071.7757L25.8121%2067.2858L24.2839%2057.3608L30.6515%2050.2716L39.3113%2050.8623L41.4763%2051.4531L50.2636%2058.1879L68.9842%2072.7209L93.4357%2090.6804L97.0015%2093.6343L98.4374%2092.6652L98.6571%2091.9801L97.0015%2089.2625L83.757%2065.2772L69.621%2040.8192L63.2534%2030.6579L61.5978%2024.632C60.9565%2022.1032%2060.579%2020.0111%2060.579%2017.4246L67.8381%207.49965L71.9133%206.19995L81.7193%207.49965L85.7946%2011.0443L91.9074%2024.9865L101.714%2046.8451L116.996%2076.62L121.453%2085.4816L123.873%2093.6343L124.764%2096.1155H126.292V94.6976L127.566%2077.9197L129.858%2057.3608L132.15%2030.8942L132.915%2023.4505L136.608%2014.4708L143.994%209.62643L149.725%2012.344L154.437%2019.0788L153.8%2023.4505L150.998%2041.6463L145.522%2070.1215L141.957%2089.2625H143.994L146.414%2086.7813L156.093%2074.0206L172.266%2053.698L179.398%2045.6635L187.803%2036.802L193.152%2032.5484H203.34L210.726%2043.6549L207.415%2055.1159L196.972%2068.3492L188.312%2079.5739L175.896%2096.2095L168.191%20109.585L168.882%20110.689L170.738%20110.53L198.755%20104.504L213.91%20101.787L231.994%2098.7149L240.144%20102.496L241.036%20106.395L237.852%20114.311L218.495%20119.037L195.826%20123.645L162.07%20131.592L161.696%20131.893L162.137%20132.547L177.36%20133.925L183.855%20134.279H199.774L229.447%20136.524L237.215%20141.605L241.8%20147.867L241.036%20152.711L229.065%20158.737L213.019%20154.956L175.45%20145.977L162.587%20142.787H160.805V143.85L171.502%20154.366L191.242%20172.089L215.82%20195.011L217.094%20200.682L213.91%20205.172L210.599%20204.699L188.949%20188.394L180.544%20181.069L161.696%20165.118H160.422V166.772L164.752%20173.152L187.803%20207.771L188.949%20218.405L187.294%20221.832L181.308%20223.959L174.813%20222.777L161.187%20203.754L147.305%20182.486L136.098%20163.345L134.745%20164.2L128.075%20235.42L125.019%20239.082L117.887%20241.8L111.902%20237.31L108.718%20229.984L111.902%20215.452L115.722%20196.547L118.779%20181.541L121.58%20162.873L123.291%20156.636L123.14%20156.219L121.773%20156.449L107.699%20175.752L86.304%20204.699L69.3663%20222.777L65.291%20224.431L58.2867%20220.768L58.9235%20214.27L62.8713%20208.48L86.304%20178.705L100.44%20160.155L109.551%20149.507L109.462%20147.967L108.959%20147.924L46.6977%20188.512L35.6182%20189.93L30.7788%20185.44L31.4156%20178.115L33.7079%20175.752L52.4285%20162.873Z%22%20fill%3D%22%23d97757%22%2F%3E%3C%2Fsvg%3E" alt="" width="20" height="20">Ask Claude</p><p class="way-t">Claude installs it for you.</p><button type="button" class="big claude" data-copy="Install the effortless plugin for me: run `claude plugin marketplace add HeyCubit/effortless` and then `claude plugin install effortless@effortless`. When both succeed, tell me to run /reload-plugins." aria-label="Copy the install request for Claude"><img src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%20248%20248%22%3E%3Cstyle%3Esvg%7Bbackground%3Atransparent%3Bdisplay%3Ablock%7D%3C%2Fstyle%3E%3Cpath%20d%3D%22M52.4285%20162.873L98.7844%20136.879L99.5485%20134.602L98.7844%20133.334H96.4921L88.7237%20132.862L62.2346%20132.153L39.3113%20131.207L17.0249%20130.026L11.4214%20128.844L6.2%20121.873L6.7094%20118.447L11.4214%20115.257L18.171%20115.847L33.0711%20116.911L55.485%20118.447L71.6586%20119.392L95.728%20121.873H99.5485L100.058%20120.337L98.7844%20119.392L97.7656%20118.447L74.5877%20102.732L49.4995%2086.1905L36.3823%2076.62L29.3779%2071.7757L25.8121%2067.2858L24.2839%2057.3608L30.6515%2050.2716L39.3113%2050.8623L41.4763%2051.4531L50.2636%2058.1879L68.9842%2072.7209L93.4357%2090.6804L97.0015%2093.6343L98.4374%2092.6652L98.6571%2091.9801L97.0015%2089.2625L83.757%2065.2772L69.621%2040.8192L63.2534%2030.6579L61.5978%2024.632C60.9565%2022.1032%2060.579%2020.0111%2060.579%2017.4246L67.8381%207.49965L71.9133%206.19995L81.7193%207.49965L85.7946%2011.0443L91.9074%2024.9865L101.714%2046.8451L116.996%2076.62L121.453%2085.4816L123.873%2093.6343L124.764%2096.1155H126.292V94.6976L127.566%2077.9197L129.858%2057.3608L132.15%2030.8942L132.915%2023.4505L136.608%2014.4708L143.994%209.62643L149.725%2012.344L154.437%2019.0788L153.8%2023.4505L150.998%2041.6463L145.522%2070.1215L141.957%2089.2625H143.994L146.414%2086.7813L156.093%2074.0206L172.266%2053.698L179.398%2045.6635L187.803%2036.802L193.152%2032.5484H203.34L210.726%2043.6549L207.415%2055.1159L196.972%2068.3492L188.312%2079.5739L175.896%2096.2095L168.191%20109.585L168.882%20110.689L170.738%20110.53L198.755%20104.504L213.91%20101.787L231.994%2098.7149L240.144%20102.496L241.036%20106.395L237.852%20114.311L218.495%20119.037L195.826%20123.645L162.07%20131.592L161.696%20131.893L162.137%20132.547L177.36%20133.925L183.855%20134.279H199.774L229.447%20136.524L237.215%20141.605L241.8%20147.867L241.036%20152.711L229.065%20158.737L213.019%20154.956L175.45%20145.977L162.587%20142.787H160.805V143.85L171.502%20154.366L191.242%20172.089L215.82%20195.011L217.094%20200.682L213.91%20205.172L210.599%20204.699L188.949%20188.394L180.544%20181.069L161.696%20165.118H160.422V166.772L164.752%20173.152L187.803%20207.771L188.949%20218.405L187.294%20221.832L181.308%20223.959L174.813%20222.777L161.187%20203.754L147.305%20182.486L136.098%20163.345L134.745%20164.2L128.075%20235.42L125.019%20239.082L117.887%20241.8L111.902%20237.31L108.718%20229.984L111.902%20215.452L115.722%20196.547L118.779%20181.541L121.58%20162.873L123.291%20156.636L123.14%20156.219L121.773%20156.449L107.699%20175.752L86.304%20204.699L69.3663%20222.777L65.291%20224.431L58.2867%20220.768L58.9235%20214.27L62.8713%20208.48L86.304%20178.705L100.44%20160.155L109.551%20149.507L109.462%20147.967L108.959%20147.924L46.6977%20188.512L35.6182%20189.93L30.7788%20185.44L31.4156%20178.115L33.7079%20175.752L52.4285%20162.873Z%22%20fill%3D%22%231f1009%22%2F%3E%3C%2Fsvg%3E" alt="" width="20" height="20"><span>Copy for Claude</span></button><p class="way-h">Paste into Claude Code, press Enter.</p></div><div class="way way-cmd"><p class="way-k"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="1.5" y="3" width="17" height="14" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M5.5 8l2.5 2-2.5 2M10 12.5h4.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Terminal</p><p class="way-t">Run one command.</p><button type="button" class="big term" data-copy="claude plugin marketplace add HeyCubit/effortless; claude plugin install effortless@effortless" aria-label="Copy the install command"><svg viewBox="0 0 16 16" aria-hidden="true"><rect x="5" y="5" width="8.5" height="8.5" rx="2" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M3 10.5V4a1.5 1.5 0 011.5-1.5H11" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg><span>Copy command</span></button><p class="way-h"><code>claude plugin marketplace add HeyCubit/effortless; claude plugin install effortless@effortless</code></p></div></div><p class="then">Then run <code>/reload-plugins</code> in Claude Code.</p>
     <div class="cta"><a class="gh" href="https://github.com/HeyCubit/effortless"><svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg><span>Star on GitHub</span></a></div>
+  </section>
+
+  <section class="cubit" id="cubit" aria-labelledby="cu-h">
+    <div class="cu-text">
+      <p class="cu-kicker">Meanwhile, in another dimension</p>
+      <h2 id="cu-h">Also building <span class="cu-logo" role="img" aria-label="Cubit" style="--logo:url(assets/cubit-logo-white.svg)"></span></h2>
+      <p class="lead">Send anything to anyone, anywhere.</p>
+      <a class="cu-btn" href="https://heycubit.com" rel="noopener">Join the waitlist</a>
+    </div>
+    <div class="rip" aria-hidden="true">
+      <div class="rip-hole"></div>
+      <div class="rip-edge"></div>
+      <canvas class="rip-peek" id="rip-peek" width="900" height="900"></canvas>
+    </div>
   </section>
 
 </main>
@@ -964,6 +993,62 @@ var Dash=(function(){
   function go(){var p=v.play();if(p&&p.catch)p.catch(still);}
   if('IntersectionObserver' in window)new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){if(!v.controls)go();}else if(!v.controls)v.pause();});},{threshold:.25}).observe(v);
 })();
+// Cubit leans out of the rip: the real peek clips from the Cubit repo (calm, happy, curious; colour on top, alpha below)
+// drawn to one canvas bigger than the hole. The canvas is masked to the hole plus a band above its top edge, so his head
+// rises over the edge as if he were coming out of the page. A different mood each time; he comes back every few seconds
+// while the section is on screen. With reduced motion nothing plays.
+(function () {
+  var cvs = document.getElementById('rip-peek'); if (!cvs) return;
+  // His colour: the lighter blue, rendered to read on the sky.
+  var COLOUR = 'blue';
+  var rip = cvs.parentNode, still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var MOODS = ['calm', 'happy', 'curious'], mood = Math.floor(Math.random() * 3), vids = {};
+  // The clips are made for this hole: a 1320x1200 frame whose rows 300..1200 are the hole, edge to edge. He rises from
+  // behind the bottom rim on the right and never crosses the side rims, so the canvas maps 1:1 onto the rip.
+  function place() {
+    // Smaller than the hole's own scale, so his whole head fits under the top rim; set low, so the bottom rim hides his base.
+    var W = rip.clientWidth, H = rip.clientHeight, s = W / 1320 * 0.74, C = Math.round(1200 * s), top = Math.round(H * 1.02 - 945 * s), left = Math.round(W * 0.6 - 790 * s);
+    cvs.style.width = Math.round(1320 * s) + 'px'; cvs.style.height = C + 'px'; cvs.style.left = left + 'px'; cvs.style.top = top + 'px';
+    var pos = (-left) + 'px ' + (-top) + 'px, 0px 0px', size = W + 'px ' + H + 'px, 0px 0px';
+    cvs.style.webkitMaskPosition = pos; cvs.style.maskPosition = pos; cvs.style.webkitMaskSize = size; cvs.style.maskSize = size;
+  }
+  place(); addEventListener('resize', place);
+  if (still) { cvs.outerHTML = '<img class="rip-peek" style="' + cvs.getAttribute('style') + '" src="assets/cubit/hole-peek-calm-' + COLOUR + '-still.png" alt="">'; return; }
+  var gl = cvs.getContext('webgl', { premultipliedAlpha: true, alpha: true }); if (!gl) return;
+  function sh(t, src) { var o = gl.createShader(t); gl.shaderSource(o, src); gl.compileShader(o); return o; }
+  var prog = gl.createProgram();
+  gl.attachShader(prog, sh(gl.VERTEX_SHADER, 'attribute vec2 p;varying vec2 u;void main(){u=vec2(p.x*.5+.5,.5-p.y*.5);gl_Position=vec4(p,0.,1.);}'));
+  gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, 'precision mediump float;uniform sampler2D t;varying vec2 u;void main(){vec3 c=texture2D(t,vec2(u.x,u.y*.5)).rgb;float a=texture2D(t,vec2(u.x,.5+u.y*.5)).r;gl_FragColor=vec4(c,a);}'));
+  gl.linkProgram(prog); gl.useProgram(prog);
+  var buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+  var loc = gl.getAttribLocation(prog, 'p'); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+  var tex = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, tex);
+  [gl.TEXTURE_WRAP_S, gl.TEXTURE_WRAP_T].forEach(function (k) { gl.texParameteri(gl.TEXTURE_2D, k, gl.CLAMP_TO_EDGE); });
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+  gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+  function video(name) {
+    if (vids[name]) return vids[name];
+    var v = document.createElement('video'); v.src = 'assets/cubit/hole-peek-' + name + '-' + COLOUR + '-packed.mp4'; v.muted = true; v.playsInline = true; v.preload = 'auto';
+    v.addEventListener('ended', function () { draw(v); if (seen) again = setTimeout(next, 3500); });
+    return (vids[name] = v);
+  }
+  var cur = null, raf = 0, seen = false, again = 0;
+  function draw(v) {
+    var dpr = Math.min(2, devicePixelRatio || 1), w = Math.round(cvs.clientWidth * dpr), h = Math.round(cvs.clientHeight * dpr);
+    if (cvs.width !== w || cvs.height !== h) { cvs.width = w; cvs.height = h; }
+    gl.viewport(0, 0, cvs.width, cvs.height); gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT);
+    try { gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, v); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); } catch (e) {}
+  }
+  function loop() { if (cur) draw(cur); if (cur && !cur.paused && !cur.ended) raf = requestAnimationFrame(loop); }
+  function next() {
+    clearTimeout(again); cur = video(MOODS[mood]); mood = (mood + 1) % MOODS.length; video(MOODS[mood]);
+    cur.currentTime = 0; cur.play().then(function () { cancelAnimationFrame(raf); raf = requestAnimationFrame(loop); }).catch(function () {});
+  }
+  new IntersectionObserver(function (es) {
+    es.forEach(function (e) { seen = e.isIntersecting; if (seen && (!cur || cur.paused)) next(); if (!seen) clearTimeout(again); });
+  }, { threshold: 0.35 }).observe(rip);
+})();
+
 </script>
 </body>
 </html>
