@@ -998,6 +998,8 @@ var Dash=(function(){
 // while the section is on screen. With reduced motion nothing plays.
 (function () {
   var cvs = document.getElementById('rip-peek'); if (!cvs) return;
+  // His colour: pink pops on the blue sky; ?cubit=blue shows the other one.
+  var COLOUR = (location.search.match(/cubit=(blue|pink)/) || [])[1] || 'pink';
   var rip = cvs.parentNode, still = matchMedia('(prefers-reduced-motion: reduce)').matches;
   var MOODS = ['calm', 'happy', 'curious'], mood = Math.floor(Math.random() * 3), vids = {};
   // The clips are made for this hole: a 1320x1200 frame whose rows 300..1200 are the hole, edge to edge. He rises from
@@ -1005,11 +1007,11 @@ var Dash=(function(){
   function place() {
     var W = rip.clientWidth, s = W / 1320, C = Math.round(1200 * s), top = Math.round(-300 * s);
     cvs.style.width = W + 'px'; cvs.style.height = C + 'px'; cvs.style.left = '0px'; cvs.style.top = top + 'px';
-    var pos = '0px ' + (-top) + 'px, 0px 0px', size = W + 'px ' + rip.clientHeight + 'px, ' + W + 'px ' + (-top) + 'px';
+    var pos = '0px ' + (-top) + 'px, 0px 0px', size = W + 'px ' + rip.clientHeight + 'px, ' + W + 'px ' + Math.round(-top + rip.clientHeight * 0.22) + 'px';
     cvs.style.webkitMaskPosition = pos; cvs.style.maskPosition = pos; cvs.style.webkitMaskSize = size; cvs.style.maskSize = size;
   }
   place(); addEventListener('resize', place);
-  if (still) { cvs.outerHTML = '<img class="rip-peek" style="' + cvs.getAttribute('style') + '" src="assets/cubit/hole-peek-calm-blue-still.png" alt="">'; return; }
+  if (still) { cvs.outerHTML = '<img class="rip-peek" style="' + cvs.getAttribute('style') + '" src="assets/cubit/hole-peek-calm-' + COLOUR + '-still.png" alt="">'; return; }
   var gl = cvs.getContext('webgl', { premultipliedAlpha: true, alpha: true }); if (!gl) return;
   function sh(t, src) { var o = gl.createShader(t); gl.shaderSource(o, src); gl.compileShader(o); return o; }
   var prog = gl.createProgram();
@@ -1024,7 +1026,7 @@ var Dash=(function(){
   gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
   function video(name) {
     if (vids[name]) return vids[name];
-    var v = document.createElement('video'); v.src = 'assets/cubit/hole-peek-' + name + '-blue-packed.mp4'; v.muted = true; v.playsInline = true; v.preload = 'auto';
+    var v = document.createElement('video'); v.src = 'assets/cubit/hole-peek-' + name + '-' + COLOUR + '-packed.mp4'; v.muted = true; v.playsInline = true; v.preload = 'auto';
     v.addEventListener('ended', function () { draw(v); if (seen) again = setTimeout(next, 3500); });
     return (vids[name] = v);
   }
