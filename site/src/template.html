@@ -780,7 +780,7 @@ button.btn:focus-visible,.sel select:focus-visible{outline:2px solid var(--accen
 <div class="edge-peek" id="edge-peek" hidden>
   <a class="ep-go" href="#cubit" tabindex="-1" aria-hidden="true"><canvas class="ep-cubit" width="220" height="390"></canvas></a>
   <div class="ep-bubble" role="group" aria-label="Cubit">
-    <b>hi from another dimension!</b>
+    <b>psst, I'm further down</b>
     <span class="ep-acts"><a class="ep-home" href="#cubit">Hello!</a></span>
   </div>
 </div>
@@ -1162,6 +1162,8 @@ function cubitIn(rip, cvs) {
     try { sessionStorage.setItem('cubit-peeked', '1'); } catch (e) {}
     if (Math.random() < 0.5) box.classList.add('right');
     box.style.top = (30 + Math.random() * 40) + '%';
+    // Below the Cubit section he points the other way.
+    if (document.getElementById('cubit').getBoundingClientRect().bottom < 0) box.querySelector('b').textContent = "psst, I'm further up";
     box.hidden = false;
     cubit = cubitIn(null, cvs); if (!cubit) { box.hidden = true; return; }
     var bub = box.querySelector('.ep-bubble'), cl = cubitCloud(bub.offsetWidth, bub.offsetHeight, !box.classList.contains('right'));
