@@ -1062,7 +1062,7 @@ function cubitCloud(w0, h0, dotsLeft) {
     lobes.push([lx - nx / ln * (1 - BULGE) * r, ly - ny / ln * (1 - BULGE) * r, r]);
   }
   var sx = dotsLeft ? -1 : 1;
-  var dots = [[sx * a * 0.55, b + r0 * 0.55 + 6, 10], [sx * (a * 0.55 + 12), b + r0 * 0.55 + 28, 6.5]];
+  var dots = [[sx * (a * 0.9 + 4), b + r0 * 0.3 + 12, 10], [sx * (a * 0.9 + 22), b + r0 * 0.3 + 32, 6.5]];
   var L = a, U = b, R = a, D = b;
   lobes.concat(dots).forEach(function (o) { L = Math.max(L, -o[0] + o[2]); U = Math.max(U, -o[1] + o[2]); R = Math.max(R, o[0] + o[2]); D = Math.max(D, o[1] + o[2]); });
   var W = L + R, H = U + D, core = '';
