@@ -17,7 +17,7 @@
 ## Website
 - https://heycubit.github.io/effortless/ is `gh-pages`, rebuilt from `main`. Source `site/src/` (`template.html`,
   `report.html`, `whats-new.html`, `build.mjs`); built pages are committed. Publish with `tools/site.sh "<what changed>"`
-  (builds, pushes main, fast-forwards gh-pages). Live: gh-pages `18872be`. Pages caches 10 minutes: hard refresh.
+  (builds, pushes main, fast-forwards gh-pages). Live: gh-pages `3e00ef1` (Cubit section, published 2026-10-15). Pages caches 10 minutes: hard refresh.
 - Footer: "Also building [Cubit logo]" links to heycubit.com, next to a "Join the waitlist" pill
   (heycubit.com/waitlist/). Logo is `site/assets/cubit-logo-white.svg`, copied from the Cubit repo's `brand/`.
 - Report a bug / Request a feature posts to a Cloudflare Worker, `report-worker/` (deployed as `effortless-report`,
