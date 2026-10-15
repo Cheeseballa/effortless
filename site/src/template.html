@@ -405,7 +405,7 @@ button.btn:focus-visible,.sel select:focus-visible{outline:2px solid var(--accen
 .ep-x{position:absolute;top:calc(var(--h) * .06 - 12px);left:calc(var(--h) * .56 - 12px);width:24px;height:24px;border-radius:50%;border:1px solid #3a3550;background:#1d1c22;color:var(--muted);font:14px/1 var(--sans,system-ui);cursor:pointer;opacity:0;transition:opacity .3s;pointer-events:none}
 .edge-peek.right .ep-x{left:auto;right:calc(var(--h) * .56 - 12px)}
 .edge-peek.talk .ep-x{opacity:1;pointer-events:auto}
-@media (max-width:860px){.edge-peek{--h:min(240px,34vh)}.ep-bubble{font-size:15px}.ep-x{width:32px;height:32px;font-size:17px;top:calc(var(--h) * .06 - 16px)}}
+@media (max-width:860px){.edge-peek{--h:min(240px,34vh)}.ep-bubble{font-size:15px;white-space:normal;width:max-content;max-width:min(56vw,230px)}.ep-x{width:32px;height:32px;font-size:17px;top:calc(var(--h) * .06 - 16px)}}
 @media (prefers-reduced-motion:reduce){.rip.shut{transform:none}.rip.tear{animation:none}}
 .inst-sec{padding:120px var(--frame) 40px;scroll-margin-top:40px}
 .inst-sec h2{margin:0;font:500 clamp(30px,3.8vw,46px)/1.1 var(--display);letter-spacing:-.02em;color:#f4f2ff}
@@ -777,9 +777,9 @@ button.btn:focus-visible,.sel select:focus-visible{outline:2px solid var(--accen
 </main>
 
 <div class="edge-peek" id="edge-peek" hidden>
-  <a class="ep-go" href="#cubit" aria-label="Cubit says: oops, wrong dimension. Go to the Cubit section">
+  <a class="ep-go" href="#cubit" aria-label="Cubit says: oops, wrong dimension, take me home? Go to the Cubit section">
     <canvas class="ep-cubit" width="220" height="390"></canvas>
-    <span class="ep-bubble">oops, wrong dimension</span>
+    <span class="ep-bubble">oops, wrong dimension… take me home?</span>
   </a>
   <button type="button" class="ep-x" aria-label="Close">×</button>
 </div>
@@ -1103,10 +1103,10 @@ function cubitIn(rip, cvs) {
   }, { threshold: 0.35 }).observe(rip);
 })();
 
-// Cubit at the edge of the screen, once per visit: after 20 seconds or halfway down the page, whichever comes first, he
-// leans in from the left or right edge (the trailer's peek), says "oops, wrong dimension" and leans back out when the
-// clip ends, about 12 seconds later. A click takes you to the Cubit section; the cross sends him away. He waits while
-// the Cubit section or Install is on screen, and skips the visit entirely with reduced motion.
+// Cubit at the edge of the screen, once per visit: at a random moment 12 to 32 seconds in, wherever you are on the page,
+// he leans in from the left or right edge at a random height (the trailer's peek), asks to be taken home and leans back
+// out when the clip ends, about 12 seconds later. A click takes you to the Cubit section; the cross sends him away.
+// He waits while the Cubit section, Install or the buttons up top are on screen, and skips the visit with reduced motion.
 (function () {
   var box = document.getElementById('edge-peek'); if (!box) return;
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
@@ -1117,15 +1117,15 @@ function cubitIn(rip, cvs) {
     es.forEach(function (e) { var i = inView.indexOf(e.target); if (e.isIntersecting) { if (i < 0) inView.push(e.target); } else if (i >= 0) inView.splice(i, 1); });
     if (inView.length) close(); else go();
   });
-  ['cubit', 'install'].forEach(function (id) { var el = document.getElementById(id); if (el) io.observe(el); });
-  timers.push(setTimeout(function () { due = true; go(); }, 20000));
-  function half() { if (scrollY > (document.documentElement.scrollHeight - innerHeight) * 0.5) { due = true; go(); } }
-  addEventListener('scroll', half, { passive: true });
+  // Never over the buttons people came for: the Cubit section, Install, and the Star and Install buttons up top.
+  ['#cubit', '#install', '.intro .cta'].forEach(function (q) { var el = document.querySelector(q); if (el) io.observe(el); });
+  timers.push(setTimeout(function () { due = true; go(); }, 12000 + Math.random() * 20000));
   function go() {
     if (!due || done || inView.length) return;
-    done = true; removeEventListener('scroll', half);
+    done = true;
     try { sessionStorage.setItem('cubit-peeked', '1'); } catch (e) {}
     if (Math.random() < 0.5) box.classList.add('right');
+    box.style.top = (30 + Math.random() * 40) + '%';
     box.hidden = false;
     cubit = cubitIn(null, cvs); if (!cubit) { box.hidden = true; return; }
     showing = true;
