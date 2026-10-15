@@ -386,29 +386,27 @@ button.btn:focus-visible,.sel select:focus-visible{outline:2px solid var(--accen
 .rip-edge{background:url("assets/cubit/rip-edge.svg") center/100% 100% no-repeat;filter:drop-shadow(0 0 10px #a79cf766);pointer-events:none}
 .rip-peek{position:absolute;pointer-events:none;-webkit-mask-image:var(--ripmask),linear-gradient(#000,#000);mask-image:var(--ripmask),linear-gradient(#000,#000);-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat}
 @media (max-width:860px){.cubit{grid-template-columns:minmax(0,1fr);text-align:center}.rip{justify-self:center}}
-/* The rip tears open in jagged steps, like something breaking through, and mends the same way. */
+/* The rip tears open in jagged steps, like something breaking through. Cubit at the screen edge leans in on his own,
+   no rip, the trailer's peek. */
 .rip.shut{transform:scale(0)}
-.rip.tear{animation:rip-tear .7s both}
-.rip.mend{animation:rip-mend .5s both}
+.rip.tear{animation:rip-tear .7s both;animation-timing-function:steps(2,end)}
 @keyframes rip-tear{0%{transform:scale(.06,.03) rotate(-4deg)}18%{transform:scale(.4,.08) rotate(-4deg)}36%{transform:scale(.42,.45) rotate(2deg)}56%{transform:scale(.85,.6) rotate(-1deg)}76%{transform:scale(1.07,1.05)}100%{transform:scale(1)}}
-@keyframes rip-mend{0%{transform:scale(1)}40%{transform:scale(.7,.5) rotate(2deg)}70%{transform:scale(.35,.1) rotate(-3deg)}100%{transform:scale(0)}}
-.rip.tear,.rip.mend{animation-timing-function:steps(2,end)}
-.edge-peek{position:fixed;z-index:40;right:28px;bottom:12vh;display:flex;align-items:flex-start;--cubit:#b4e8f7}
+.edge-peek{position:fixed;z-index:40;left:0;top:50%;transform:translateY(-50%);--h:min(360px,46vh);--cubit:#b4e8f7;transition:opacity .3s}
 .edge-peek[hidden]{display:none}
-.edge-peek.left{right:auto;left:28px}
-.ep-go{display:flex;align-items:flex-start;gap:6px;text-decoration:none;color:inherit}
-.edge-peek.left .ep-go{flex-direction:row-reverse}
-.edge-peek .rip{width:210px;max-width:none;transform:scale(0)}
-.edge-peek .rip.tear{transform:none}
-.ep-bubble{position:relative;margin-top:8px;padding:9px 13px;border-radius:10px;background:#1d1c22;border:1px solid #3a3550;color:var(--cubit);font:500 17px/1.2 "Pixelify Sans",var(--mono,monospace);white-space:nowrap;box-shadow:0 10px 30px -12px #000;opacity:0;transform:translateY(6px);transition:opacity .3s,transform .3s}
-.edge-peek.talk .ep-bubble{opacity:1;transform:none}
+.edge-peek.gone{opacity:0}
+.edge-peek.right{left:auto;right:0}
+.ep-go{display:block;text-decoration:none;color:inherit}
+.ep-cubit{display:block;height:var(--h);width:calc(var(--h) * 220 / 390)}
+.edge-peek.right .ep-cubit{transform:scaleX(-1)}
+.ep-bubble{position:absolute;top:calc(var(--h) * .06);left:calc(var(--h) * .56);padding:9px 13px;border-radius:10px;background:#1d1c22;border:1px solid #3a3550;color:var(--cubit);font:500 17px/1.2 "Pixelify Sans",var(--mono,monospace);white-space:nowrap;box-shadow:0 10px 30px -12px #000;opacity:0;transform:translateY(6px);transition:opacity .3s,transform .3s;pointer-events:none}
+.edge-peek.right .ep-bubble{left:auto;right:calc(var(--h) * .56)}
+.edge-peek.talk .ep-bubble{opacity:1;transform:none;pointer-events:auto}
 .ep-go:hover .ep-bubble{border-color:var(--cubit)}
-.ep-x{position:absolute;top:-6px;width:22px;height:22px;border-radius:50%;border:1px solid #3a3550;background:#1d1c22;color:var(--muted);font:14px/1 var(--sans,system-ui);cursor:pointer;opacity:0;transition:opacity .3s}
-.edge-peek .ep-x{left:-10px}
-.edge-peek.left .ep-x{left:auto;right:-10px}
-.edge-peek.talk .ep-x{opacity:1}
-@media (max-width:860px){.edge-peek,.edge-peek.left{left:50%;right:auto;bottom:14px;transform:translateX(-50%)}.ep-go,.edge-peek.left .ep-go{flex-direction:column;align-items:center;gap:2px}.edge-peek .rip{width:170px}.ep-bubble{margin-top:0;font-size:16px}.edge-peek .ep-x,.edge-peek.left .ep-x{left:auto;right:-14px;top:-12px;width:32px;height:32px;font-size:18px}}
-@media (prefers-reduced-motion:reduce){.rip.shut{transform:none}.rip.tear,.rip.mend{animation:none}}
+.ep-x{position:absolute;top:calc(var(--h) * .06 - 12px);left:calc(var(--h) * .56 - 12px);width:24px;height:24px;border-radius:50%;border:1px solid #3a3550;background:#1d1c22;color:var(--muted);font:14px/1 var(--sans,system-ui);cursor:pointer;opacity:0;transition:opacity .3s;pointer-events:none}
+.edge-peek.right .ep-x{left:auto;right:calc(var(--h) * .56 - 12px)}
+.edge-peek.talk .ep-x{opacity:1;pointer-events:auto}
+@media (max-width:860px){.edge-peek{--h:min(240px,34vh)}.ep-bubble{font-size:15px}.ep-x{width:32px;height:32px;font-size:17px;top:calc(var(--h) * .06 - 16px)}}
+@media (prefers-reduced-motion:reduce){.rip.shut{transform:none}.rip.tear{animation:none}}
 .inst-sec{padding:120px var(--frame) 40px;scroll-margin-top:40px}
 .inst-sec h2{margin:0;font:500 clamp(30px,3.8vw,46px)/1.1 var(--display);letter-spacing:-.02em;color:#f4f2ff}
 .inst-sec .lead{margin:14px 0 0;max-width:34em;color:var(--muted);font-size:17px;line-height:1.55}
@@ -779,9 +777,9 @@ button.btn:focus-visible,.sel select:focus-visible{outline:2px solid var(--accen
 </main>
 
 <div class="edge-peek" id="edge-peek" hidden>
-  <a class="ep-go" href="#cubit" aria-label="Cubit says: psst, down here. Go to the Cubit section">
-    <span class="ep-bubble">psst… down here</span>
-    <span class="rip" aria-hidden="true"><span class="rip-hole"></span><span class="rip-edge"></span><canvas class="rip-peek" width="300" height="300"></canvas></span>
+  <a class="ep-go" href="#cubit" aria-label="Cubit says: oops, wrong dimension. Go to the Cubit section">
+    <canvas class="ep-cubit" width="220" height="390"></canvas>
+    <span class="ep-bubble">oops, wrong dimension</span>
   </a>
   <button type="button" class="ep-x" aria-label="Close">×</button>
 </div>
@@ -1038,12 +1036,12 @@ function cubitFit(rip, el) {
   el.style.webkitMaskPosition = pos; el.style.maskPosition = pos; el.style.webkitMaskSize = size; el.style.maskSize = size;
 }
 function cubitIn(rip, cvs) {
-  cubitFit(rip, cvs); addEventListener('resize', function () { cubitFit(rip, cvs); });
+  if (rip) { cubitFit(rip, cvs); addEventListener('resize', function () { cubitFit(rip, cvs); }); }
   var gl = cvs.getContext('webgl', { premultipliedAlpha: true, alpha: true }); if (!gl) return null;
   function sh(t, src) { var o = gl.createShader(t); gl.shaderSource(o, src); gl.compileShader(o); return o; }
   var prog = gl.createProgram();
   gl.attachShader(prog, sh(gl.VERTEX_SHADER, 'attribute vec2 p;varying vec2 u;void main(){u=vec2(p.x*.5+.5,.5-p.y*.5);gl_Position=vec4(p,0.,1.);}'));
-  gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, 'precision mediump float;uniform sampler2D t;varying vec2 u;void main(){vec3 c=texture2D(t,vec2(u.x,u.y*.5)).rgb;float a=texture2D(t,vec2(u.x,.5+u.y*.5)).r;gl_FragColor=vec4(c,a);}'));
+  gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, 'precision mediump float;uniform sampler2D t;varying vec2 u;void main(){vec3 c=texture2D(t,vec2(u.x,u.y*.5)).rgb;float a=texture2D(t,vec2(u.x,.5+u.y*.5)).r;gl_FragColor=vec4(c*a,a);}'));
   gl.linkProgram(prog); gl.useProgram(prog);
   var buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
   var loc = gl.getAttribLocation(prog, 'p'); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
@@ -1062,7 +1060,7 @@ function cubitIn(rip, cvs) {
   function finish() { var f = after; after = null; if (f) f(); }
   function video(name) {
     if (vids[name]) return vids[name];
-    var v = document.createElement('video'); v.src = 'assets/cubit/hole-peek-' + name + '-' + CUBIT_COLOUR + '-packed.mp4'; v.muted = true; v.playsInline = true; v.preload = 'auto';
+    var v = document.createElement('video'); v.src = /\.mp4$/.test(name) ? name : 'assets/cubit/hole-peek-' + name + '-' + CUBIT_COLOUR + '-packed.mp4'; v.muted = true; v.playsInline = true; v.preload = 'auto';
     v.addEventListener('ended', function () { draw(v); finish(); });
     return (vids[name] = v);
   }
@@ -1105,45 +1103,41 @@ function cubitIn(rip, cvs) {
   }, { threshold: 0.35 }).observe(rip);
 })();
 
-// Cubit at the edge of the screen, once per visit: after 20 seconds or halfway down the page, whichever comes first, a
-// small rip tears open by the side (on a phone, at the bottom), he rises with "psst… down here", and the rip closes when he has sunk
-// back. A click takes you to the Cubit section. He waits while the Cubit section or Install is on screen, and skips the
-// visit entirely with reduced motion.
+// Cubit at the edge of the screen, once per visit: after 20 seconds or halfway down the page, whichever comes first, he
+// leans in from the left or right edge (the trailer's peek), says "oops, wrong dimension" and leans back out when the
+// clip ends, about 12 seconds later. A click takes you to the Cubit section; the cross sends him away. He waits while
+// the Cubit section or Install is on screen, and skips the visit entirely with reduced motion.
 (function () {
   var box = document.getElementById('edge-peek'); if (!box) return;
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   try { if (sessionStorage.getItem('cubit-peeked')) return; } catch (e) {}
-  var rip = box.querySelector('.rip'), cvs = box.querySelector('canvas'), due = false, done = false, showing = false, cubit = null, inView = [];
+  var SRC = 'assets/cubit/side-peek-blue-packed.mp4';
+  var cvs = box.querySelector('canvas'), due = false, done = false, showing = false, cubit = null, inView = [], timers = [];
   var io = new IntersectionObserver(function (es) {
     es.forEach(function (e) { var i = inView.indexOf(e.target); if (e.isIntersecting) { if (i < 0) inView.push(e.target); } else if (i >= 0) inView.splice(i, 1); });
     if (inView.length) close(); else go();
   });
   ['cubit', 'install'].forEach(function (id) { var el = document.getElementById(id); if (el) io.observe(el); });
-  setTimeout(function () { due = true; go(); }, 20000);
+  timers.push(setTimeout(function () { due = true; go(); }, 20000));
   function half() { if (scrollY > (document.documentElement.scrollHeight - innerHeight) * 0.5) { due = true; go(); } }
   addEventListener('scroll', half, { passive: true });
   function go() {
     if (!due || done || inView.length) return;
     done = true; removeEventListener('scroll', half);
     try { sessionStorage.setItem('cubit-peeked', '1'); } catch (e) {}
-    if (Math.random() < 0.5) box.classList.add('left');
+    if (Math.random() < 0.5) box.classList.add('right');
     box.hidden = false;
-    cubit = cubitIn(rip, cvs); if (!cubit) { box.hidden = true; return; }
+    cubit = cubitIn(null, cvs); if (!cubit) { box.hidden = true; return; }
     showing = true;
-    var mood = CUBIT_MOODS[Math.floor(Math.random() * 2)];
-    cubit.load(mood);
-    void rip.offsetWidth; rip.classList.add('tear');
-    setTimeout(function () {
-      if (!showing) return;
-      cubit.play(mood, close);
-      setTimeout(function () { if (showing) box.classList.add('talk'); }, 1200);
-    }, 750);
+    cubit.play(SRC, close);
+    // He is in by about a second; the bubble goes before he leans back out.
+    timers.push(setTimeout(function () { if (showing) box.classList.add('talk'); }, 1000));
+    timers.push(setTimeout(function () { box.classList.remove('talk'); }, 10600));
   }
   function close() {
     if (!showing) return; showing = false;
-    box.classList.remove('talk'); if (cubit) cubit.stop();
-    rip.classList.remove('tear'); rip.classList.add('mend');
-    setTimeout(function () { box.hidden = true; }, 600);
+    timers.forEach(clearTimeout); box.classList.remove('talk'); box.classList.add('gone');
+    setTimeout(function () { if (cubit) cubit.stop(); box.hidden = true; }, 300);
   }
   box.querySelector('.ep-go').addEventListener('click', function (e) {
     e.preventDefault(); close();
