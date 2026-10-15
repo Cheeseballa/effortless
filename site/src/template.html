@@ -386,6 +386,28 @@ button.btn:focus-visible,.sel select:focus-visible{outline:2px solid var(--accen
 .rip-edge{background:url("assets/cubit/rip-edge.svg") center/100% 100% no-repeat;filter:drop-shadow(0 0 10px #a79cf766);pointer-events:none}
 .rip-peek{position:absolute;pointer-events:none;-webkit-mask-image:var(--ripmask),linear-gradient(#000,#000);mask-image:var(--ripmask),linear-gradient(#000,#000);-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat}
 @media (max-width:860px){.cubit{grid-template-columns:minmax(0,1fr);text-align:center}.rip{justify-self:center}}
+/* The rip tears open in jagged steps, like something breaking through, and mends the same way. */
+.rip.shut{transform:scale(0)}
+.rip.tear{animation:rip-tear .7s both}
+.rip.mend{animation:rip-mend .5s both}
+@keyframes rip-tear{0%{transform:scale(.06,.03) rotate(-4deg)}18%{transform:scale(.4,.08) rotate(-4deg)}36%{transform:scale(.42,.45) rotate(2deg)}56%{transform:scale(.85,.6) rotate(-1deg)}76%{transform:scale(1.07,1.05)}100%{transform:scale(1)}}
+@keyframes rip-mend{0%{transform:scale(1)}40%{transform:scale(.7,.5) rotate(2deg)}70%{transform:scale(.35,.1) rotate(-3deg)}100%{transform:scale(0)}}
+.rip.tear,.rip.mend{animation-timing-function:steps(2,end)}
+.edge-peek{position:fixed;z-index:40;right:28px;bottom:12vh;display:flex;align-items:flex-start;--cubit:#b4e8f7}
+.edge-peek[hidden]{display:none}
+.edge-peek.left{right:auto;left:28px}
+.ep-go{display:flex;align-items:flex-start;gap:6px;text-decoration:none;color:inherit}
+.edge-peek.left .ep-go{flex-direction:row-reverse}
+.edge-peek .rip{width:210px;max-width:none;transform:scale(0)}
+.edge-peek .rip.tear{transform:none}
+.ep-bubble{position:relative;margin-top:8px;padding:9px 13px;border-radius:10px;background:#1d1c22;border:1px solid #3a3550;color:var(--cubit);font:500 17px/1.2 "Pixelify Sans",var(--mono,monospace);white-space:nowrap;box-shadow:0 10px 30px -12px #000;opacity:0;transform:translateY(6px);transition:opacity .3s,transform .3s}
+.edge-peek.talk .ep-bubble{opacity:1;transform:none}
+.ep-go:hover .ep-bubble{border-color:var(--cubit)}
+.ep-x{position:absolute;top:-6px;width:22px;height:22px;border-radius:50%;border:1px solid #3a3550;background:#1d1c22;color:var(--muted);font:14px/1 var(--sans,system-ui);cursor:pointer;opacity:0;transition:opacity .3s}
+.edge-peek .ep-x{left:-10px}
+.edge-peek.left .ep-x{left:auto;right:-10px}
+.edge-peek.talk .ep-x{opacity:1}
+@media (prefers-reduced-motion:reduce){.rip.shut{transform:none}.rip.tear,.rip.mend{animation:none}}
 .inst-sec{padding:120px var(--frame) 40px;scroll-margin-top:40px}
 .inst-sec h2{margin:0;font:500 clamp(30px,3.8vw,46px)/1.1 var(--display);letter-spacing:-.02em;color:#f4f2ff}
 .inst-sec .lead{margin:14px 0 0;max-width:34em;color:var(--muted);font-size:17px;line-height:1.55}
@@ -755,6 +777,14 @@ button.btn:focus-visible,.sel select:focus-visible{outline:2px solid var(--accen
 
 </main>
 
+<div class="edge-peek" id="edge-peek" hidden>
+  <a class="ep-go" href="#cubit" aria-label="Cubit says: psst, down here. Go to the Cubit section">
+    <span class="ep-bubble">psst… down here</span>
+    <span class="rip" aria-hidden="true"><span class="rip-hole"></span><span class="rip-edge"></span><canvas class="rip-peek" width="300" height="300"></canvas></span>
+  </a>
+  <button type="button" class="ep-x" aria-label="Close">×</button>
+</div>
+
 <footer class="site-foot">
   <div class="foot-row">
     <span class="name">__SPARK__effortless<small>A Claude Code mod</small></span>
@@ -994,28 +1024,21 @@ var Dash=(function(){
   function go(){var p=v.play();if(p&&p.catch)p.catch(still);}
   if('IntersectionObserver' in window)new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){if(!v.controls)go();}else if(!v.controls)v.pause();});},{threshold:.25}).observe(v);
 })();
-// Cubit leans out of the rip: the real peek clips from the Cubit repo (calm, happy, curious; colour on top, alpha below)
-// drawn to one canvas bigger than the hole. The canvas is masked to the hole plus a band above its top edge, so his head
-// rises over the edge as if he were coming out of the page. A different mood each time; he comes back every few seconds
-// while the section is on screen. With reduced motion nothing plays.
-(function () {
-  var cvs = document.getElementById('rip-peek'); if (!cvs) return;
-  // His colour: the lighter blue, rendered to read on the sky.
-  var COLOUR = 'blue';
-  var rip = cvs.parentNode, still = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var MOODS = ['calm', 'happy', 'curious'], mood = Math.floor(Math.random() * 3), vids = {};
-  // The clips are made for this hole: a 1320x1200 frame whose rows 300..1200 are the hole, edge to edge. He rises from
-  // behind the bottom rim on the right and never crosses the side rims, so the canvas maps 1:1 onto the rip.
-  function place() {
-    // Smaller than the hole's own scale, so his whole head fits under the top rim; set low, so the bottom rim hides his base.
-    var W = rip.clientWidth, H = rip.clientHeight, s = W / 1320 * 0.74, C = Math.round(1200 * s), top = Math.round(H * 1.02 - 945 * s), left = Math.round(W * 0.6 - 790 * s);
-    cvs.style.width = Math.round(1320 * s) + 'px'; cvs.style.height = C + 'px'; cvs.style.left = left + 'px'; cvs.style.top = top + 'px';
-    var pos = (-left) + 'px ' + (-top) + 'px, 0px 0px', size = W + 'px ' + H + 'px, 0px 0px';
-    cvs.style.webkitMaskPosition = pos; cvs.style.maskPosition = pos; cvs.style.webkitMaskSize = size; cvs.style.maskSize = size;
-  }
-  place(); addEventListener('resize', place);
-  if (still) { cvs.outerHTML = '<img class="rip-peek" style="' + cvs.getAttribute('style') + '" src="assets/cubit/hole-peek-calm-' + COLOUR + '-still.png" alt="">'; return; }
-  var gl = cvs.getContext('webgl', { premultipliedAlpha: true, alpha: true }); if (!gl) return;
+// One Cubit in one rip: the packed clips (colour on top, alpha below) drawn to a canvas bigger than the hole, masked to
+// the hole plus a band above it so his head rises over the top edge. The clips are made for this hole: a 1320x1200 frame
+// whose rows 300..1200 are the hole, edge to edge. He rises from behind the bottom rim on the right and never crosses the
+// side rims, so the canvas maps 1:1 onto the rip. Returns null without WebGL.
+var CUBIT_COLOUR = 'blue', CUBIT_MOODS = ['calm', 'happy', 'curious'];
+function cubitFit(rip, el) {
+  // Smaller than the hole's own scale, so his whole head fits under the top rim; set low, so the bottom rim hides his base.
+  var W = rip.clientWidth, H = rip.clientHeight, s = W / 1320 * 0.74, top = Math.round(H * 1.02 - 945 * s), left = Math.round(W * 0.6 - 790 * s);
+  el.style.width = Math.round(1320 * s) + 'px'; el.style.height = Math.round(1200 * s) + 'px'; el.style.left = left + 'px'; el.style.top = top + 'px';
+  var pos = (-left) + 'px ' + (-top) + 'px, 0px 0px', size = W + 'px ' + H + 'px, 0px 0px';
+  el.style.webkitMaskPosition = pos; el.style.maskPosition = pos; el.style.webkitMaskSize = size; el.style.maskSize = size;
+}
+function cubitIn(rip, cvs) {
+  cubitFit(rip, cvs); addEventListener('resize', function () { cubitFit(rip, cvs); });
+  var gl = cvs.getContext('webgl', { premultipliedAlpha: true, alpha: true }); if (!gl) return null;
   function sh(t, src) { var o = gl.createShader(t); gl.shaderSource(o, src); gl.compileShader(o); return o; }
   var prog = gl.createProgram();
   gl.attachShader(prog, sh(gl.VERTEX_SHADER, 'attribute vec2 p;varying vec2 u;void main(){u=vec2(p.x*.5+.5,.5-p.y*.5);gl_Position=vec4(p,0.,1.);}'));
@@ -1027,13 +1050,7 @@ var Dash=(function(){
   [gl.TEXTURE_WRAP_S, gl.TEXTURE_WRAP_T].forEach(function (k) { gl.texParameteri(gl.TEXTURE_2D, k, gl.CLAMP_TO_EDGE); });
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
   gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
-  function video(name) {
-    if (vids[name]) return vids[name];
-    var v = document.createElement('video'); v.src = 'assets/cubit/hole-peek-' + name + '-' + COLOUR + '-packed.mp4'; v.muted = true; v.playsInline = true; v.preload = 'auto';
-    v.addEventListener('ended', function () { draw(v); if (seen) again = setTimeout(next, 3500); });
-    return (vids[name] = v);
-  }
-  var cur = null, raf = 0, seen = false, again = 0;
+  var vids = {}, cur = null, raf = 0, after = null;
   function draw(v) {
     var dpr = Math.min(2, devicePixelRatio || 1), w = Math.round(cvs.clientWidth * dpr), h = Math.round(cvs.clientHeight * dpr);
     if (cvs.width !== w || cvs.height !== h) { cvs.width = w; cvs.height = h; }
@@ -1041,13 +1058,97 @@ var Dash=(function(){
     try { gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, v); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); } catch (e) {}
   }
   function loop() { if (cur) draw(cur); if (cur && !cur.paused && !cur.ended) raf = requestAnimationFrame(loop); }
-  function next() {
-    clearTimeout(again); cur = video(MOODS[mood]); mood = (mood + 1) % MOODS.length; video(MOODS[mood]);
-    cur.currentTime = 0; cur.play().then(function () { cancelAnimationFrame(raf); raf = requestAnimationFrame(loop); }).catch(function () {});
+  function finish() { var f = after; after = null; if (f) f(); }
+  function video(name) {
+    if (vids[name]) return vids[name];
+    var v = document.createElement('video'); v.src = 'assets/cubit/hole-peek-' + name + '-' + CUBIT_COLOUR + '-packed.mp4'; v.muted = true; v.playsInline = true; v.preload = 'auto';
+    v.addEventListener('ended', function () { draw(v); finish(); });
+    return (vids[name] = v);
   }
+  return {
+    load: video,
+    // Plays one peek from the start; done runs when he has sunk back (or right away if the browser refuses to play).
+    play: function (name, done) {
+      cur = video(name); after = done || null; cur.currentTime = 0;
+      cur.play().then(function () { cancelAnimationFrame(raf); raf = requestAnimationFrame(loop); }).catch(finish);
+    },
+    stop: function () { after = null; if (cur) cur.pause(); cancelAnimationFrame(raf); }
+  };
+}
+
+// The Cubit section: the rip tears open the first time it scrolls into view, then Cubit peeks, a different mood each
+// time, coming back every few seconds while the section is on screen. With reduced motion the rip is open and he is a
+// still picture.
+(function () {
+  var cvs = document.getElementById('rip-peek'); if (!cvs) return;
+  var rip = cvs.parentNode;
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    cubitFit(rip, cvs); cvs.outerHTML = '<img class="rip-peek" style="' + cvs.getAttribute('style') + '" src="assets/cubit/hole-peek-calm-' + CUBIT_COLOUR + '-still.png" alt="">'; return;
+  }
+  var cubit = cubitIn(rip, cvs); if (!cubit) return;
+  rip.classList.add('shut');
+  var mood = Math.floor(Math.random() * 3), seen = false, open = false, again = 0, playing = false;
+  function next() {
+    clearTimeout(again); playing = true;
+    cubit.play(CUBIT_MOODS[mood], function () { playing = false; if (seen) again = setTimeout(next, 3500); });
+    mood = (mood + 1) % CUBIT_MOODS.length; cubit.load(CUBIT_MOODS[mood]);
+  }
+  cubit.load(CUBIT_MOODS[mood]);
   new IntersectionObserver(function (es) {
-    es.forEach(function (e) { seen = e.isIntersecting; if (seen && (!cur || cur.paused)) next(); if (!seen) clearTimeout(again); });
+    es.forEach(function (e) {
+      seen = e.isIntersecting;
+      if (!seen) { clearTimeout(again); return; }
+      if (!open) { open = true; rip.classList.remove('shut'); rip.classList.add('tear'); again = setTimeout(next, 750); }
+      else if (!playing) next();
+    });
   }, { threshold: 0.35 }).observe(rip);
+})();
+
+// Cubit at the edge of the screen, once per visit on a desktop: after 20 seconds or halfway down the page, whichever
+// comes first, a small rip tears open by the side, he rises with "psst… down here", and the rip closes when he has sunk
+// back. A click takes you to the Cubit section. He waits while the Cubit section or Install is on screen, and skips the
+// visit entirely with reduced motion, on touch screens and in narrow windows.
+(function () {
+  var box = document.getElementById('edge-peek'); if (!box) return;
+  if (!matchMedia('(min-width:861px) and (pointer:fine)').matches || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  try { if (sessionStorage.getItem('cubit-peeked')) return; } catch (e) {}
+  var rip = box.querySelector('.rip'), cvs = box.querySelector('canvas'), due = false, done = false, showing = false, cubit = null, inView = [];
+  var io = new IntersectionObserver(function (es) {
+    es.forEach(function (e) { var i = inView.indexOf(e.target); if (e.isIntersecting) { if (i < 0) inView.push(e.target); } else if (i >= 0) inView.splice(i, 1); });
+    if (inView.length) close(); else go();
+  });
+  ['cubit', 'install'].forEach(function (id) { var el = document.getElementById(id); if (el) io.observe(el); });
+  setTimeout(function () { due = true; go(); }, 20000);
+  function half() { if (scrollY > (document.documentElement.scrollHeight - innerHeight) * 0.5) { due = true; go(); } }
+  addEventListener('scroll', half, { passive: true });
+  function go() {
+    if (!due || done || inView.length) return;
+    done = true; removeEventListener('scroll', half);
+    try { sessionStorage.setItem('cubit-peeked', '1'); } catch (e) {}
+    if (Math.random() < 0.5) box.classList.add('left');
+    box.hidden = false;
+    cubit = cubitIn(rip, cvs); if (!cubit) { box.hidden = true; return; }
+    showing = true;
+    var mood = CUBIT_MOODS[Math.floor(Math.random() * 2)];
+    cubit.load(mood);
+    void rip.offsetWidth; rip.classList.add('tear');
+    setTimeout(function () {
+      if (!showing) return;
+      cubit.play(mood, close);
+      setTimeout(function () { if (showing) box.classList.add('talk'); }, 1200);
+    }, 750);
+  }
+  function close() {
+    if (!showing) return; showing = false;
+    box.classList.remove('talk'); if (cubit) cubit.stop();
+    rip.classList.remove('tear'); rip.classList.add('mend');
+    setTimeout(function () { box.hidden = true; }, 600);
+  }
+  box.querySelector('.ep-go').addEventListener('click', function (e) {
+    e.preventDefault(); close();
+    document.getElementById('cubit').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  });
+  box.querySelector('.ep-x').addEventListener('click', close);
 })();
 
 </script>
