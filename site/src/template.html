@@ -398,14 +398,17 @@ button.btn:focus-visible,.sel select:focus-visible{outline:2px solid var(--accen
 .ep-go{display:block;text-decoration:none;color:inherit}
 .ep-cubit{display:block;height:var(--h);width:calc(var(--h) * 220 / 390)}
 .edge-peek.right .ep-cubit{transform:scaleX(-1)}
-.ep-bubble{position:absolute;top:calc(var(--h) * .06);left:calc(var(--h) * .56);padding:9px 13px;border-radius:10px;background:#1d1c22;border:1px solid #3a3550;color:var(--cubit);font:500 17px/1.2 "Pixelify Sans",var(--mono,monospace);white-space:nowrap;box-shadow:0 10px 30px -12px #000;opacity:0;transform:translateY(6px);transition:opacity .3s,transform .3s;pointer-events:none}
-.edge-peek.right .ep-bubble{left:auto;right:calc(var(--h) * .56)}
+.ep-bubble{position:absolute;top:calc(var(--h) * .02);left:calc(var(--h) * .62);display:flex;flex-direction:column;align-items:center;padding:4px 2px;color:#20232a;font:650 15px/1.2 var(--sans,system-ui);white-space:nowrap;opacity:0;transform:translateY(6px) scale(.92);transform-origin:0 100%;transition:opacity .3s,transform .35s cubic-bezier(.2,1.4,.4,1);pointer-events:none}
+.ep-acts{display:flex;gap:4px;margin-top:8px}
+.ep-acts a,.ep-acts button{height:30px;padding:0 12px;border:0;border-radius:8px;font:600 13px/30px var(--sans,system-ui);cursor:pointer;text-decoration:none}
+.ep-home{background:#2a6f8f;color:#fff}
+.ep-home:hover{background:#235f7b}
+.ep-no{background:transparent;color:#656c76}
+.ep-no:hover{color:#20232a;background:#0000000f}
+.ep-cloud{position:absolute;z-index:-1;overflow:visible;filter:drop-shadow(0 10px 22px #0007);pointer-events:none}
+.edge-peek.right .ep-bubble{left:auto;right:calc(var(--h) * .62);transform-origin:100% 100%}
 .edge-peek.talk .ep-bubble{opacity:1;transform:none;pointer-events:auto}
-.ep-go:hover .ep-bubble{border-color:var(--cubit)}
-.ep-x{position:absolute;top:calc(var(--h) * .06 - 12px);left:calc(var(--h) * .56 - 12px);width:24px;height:24px;border-radius:50%;border:1px solid #3a3550;background:#1d1c22;color:var(--muted);font:14px/1 var(--sans,system-ui);cursor:pointer;opacity:0;transition:opacity .3s;pointer-events:none}
-.edge-peek.right .ep-x{left:auto;right:calc(var(--h) * .56 - 12px)}
-.edge-peek.talk .ep-x{opacity:1;pointer-events:auto}
-@media (max-width:860px){.edge-peek{--h:min(240px,34vh)}.ep-bubble{font-size:15px;white-space:normal;width:max-content;max-width:min(56vw,230px)}.ep-x{width:32px;height:32px;font-size:17px;top:calc(var(--h) * .06 - 16px)}}
+@media (max-width:860px){.edge-peek{--h:min(240px,34vh)}.ep-bubble{font-size:14px}.ep-acts a,.ep-acts button{height:36px;line-height:36px}}
 @media (prefers-reduced-motion:reduce){.rip.shut{transform:none}.rip.tear{animation:none}}
 .inst-sec{padding:120px var(--frame) 40px;scroll-margin-top:40px}
 .inst-sec h2{margin:0;font:500 clamp(30px,3.8vw,46px)/1.1 var(--display);letter-spacing:-.02em;color:#f4f2ff}
@@ -777,11 +780,11 @@ button.btn:focus-visible,.sel select:focus-visible{outline:2px solid var(--accen
 </main>
 
 <div class="edge-peek" id="edge-peek" hidden>
-  <a class="ep-go" href="#cubit" aria-label="Cubit says: oops, wrong dimension, take me home? Go to the Cubit section">
-    <canvas class="ep-cubit" width="220" height="390"></canvas>
-    <span class="ep-bubble">oops, wrong dimension… take me home?</span>
-  </a>
-  <button type="button" class="ep-x" aria-label="Close">×</button>
+  <a class="ep-go" href="#cubit" tabindex="-1" aria-hidden="true"><canvas class="ep-cubit" width="220" height="390"></canvas></a>
+  <div class="ep-bubble" role="group" aria-label="Cubit">
+    <b>oops, wrong dimension</b>
+    <span class="ep-acts"><a class="ep-home" href="#cubit">Take me home</a><button type="button" class="ep-no">Not now</button></span>
+  </div>
 </div>
 
 <footer class="site-foot">
@@ -1035,6 +1038,39 @@ function cubitFit(rip, el) {
   var pos = (-left) + 'px ' + (-top) + 'px, 0px 0px', size = W + 'px ' + H + 'px, 0px 0px';
   el.style.webkitMaskPosition = pos; el.style.maskPosition = pos; el.style.webkitMaskSize = size; el.style.maskSize = size;
 }
+// His thought cloud, grown around a w x h box the way the app grows it (cube/native.py cloud_lobes): big circles on
+// a superellipse core a little bigger than the box, a fixed big/small rhythm, bulging out modestly, and two dots trailing
+// from a bottom corner toward him. Lobe sizes are scaled to the page. Returns the SVG and how far it reaches past the box.
+function cubitCloud(w, h, dotsLeft) {
+  var PATTERN = [1.0, 0.72, 0.9, 0.68, 1.06, 0.78, 0.94, 0.7], N = 2.2, BULGE = 0.45, STEP = 1.3;
+  var r0 = Math.max(18, Math.min(34, 0.44 * Math.min(w, h))), a = w / 2 + r0 * 0.2, b = h / 2 + r0 * 0.2;
+  var pts = [], acc = 0, px = null, py = null, i;
+  for (i = 0; i <= 240; i++) {
+    var t = 2 * Math.PI * i / 240 - Math.PI / 2, c = Math.cos(t), sn = Math.sin(t);
+    var x = a * Math.sign(c) * Math.pow(Math.abs(c), 2 / N), y = b * Math.sign(sn) * Math.pow(Math.abs(sn), 2 / N);
+    if (px !== null) acc += Math.hypot(x - px, y - py);
+    px = x; py = y; pts.push([acc, x, y]);
+  }
+  var total = acc, count = Math.max(6, Math.round(total / (r0 * STEP))), k = 0, lobes = [];
+  for (var j = 0; j < count; j++) {
+    var target = total * j / count;
+    while (k + 1 < pts.length && pts[k + 1][0] < target) k++;
+    var p = pts[k], q = pts[Math.min(k + 1, pts.length - 1)], fr = q[0] > p[0] ? Math.max(0, Math.min(1, (target - p[0]) / (q[0] - p[0]))) : 0;
+    var lx = p[1] + (q[1] - p[1]) * fr, ly = p[2] + (q[2] - p[2]) * fr;
+    var r = r0 * PATTERN[j % PATTERN.length] * (1 - 0.14 * Math.max(0, ly / b)) * (1 + 0.05 * Math.sin(j * 1.7));
+    var nx = lx / (a * a), ny = ly / (b * b), ln = Math.hypot(nx, ny) || 1;
+    lobes.push([lx - nx / ln * (1 - BULGE) * r, ly - ny / ln * (1 - BULGE) * r, r]);
+  }
+  var sx = dotsLeft ? -1 : 1;
+  var dots = [[sx * a * 0.8, b + r0 * 0.6, r0 * 0.34], [sx * (a * 0.8 + r0 * 0.55), b + r0 * 1.25, r0 * 0.2]];
+  var L = a, U = b, R = a, D = b;
+  lobes.concat(dots).forEach(function (o) { L = Math.max(L, -o[0] + o[2]); U = Math.max(U, -o[1] + o[2]); R = Math.max(R, o[0] + o[2]); D = Math.max(D, o[1] + o[2]); });
+  var W = L + R, H = U + D, core = '';
+  for (i = 0; i < pts.length; i += 4) core += (i ? 'L' : 'M') + (pts[i][1] + L).toFixed(1) + ' ' + (pts[i][2] + U).toFixed(1);
+  var circles = lobes.concat(dots).map(function (o) { return '<circle cx="' + (o[0] + L).toFixed(1) + '" cy="' + (o[1] + U).toFixed(1) + '" r="' + o[2].toFixed(1) + '"/>'; }).join('');
+  return { svg: '<svg class="ep-cloud" width="' + Math.ceil(W) + '" height="' + Math.ceil(H) + '" viewBox="0 0 ' + W.toFixed(1) + ' ' + H.toFixed(1) + '" aria-hidden="true"><g fill="#dfe3eb"><path d="' + core + 'Z"/>' + circles + '</g></svg>',
+    left: L - w / 2, up: U - h / 2 };
+}
 function cubitIn(rip, cvs) {
   if (rip) { cubitFit(rip, cvs); addEventListener('resize', function () { cubitFit(rip, cvs); }); }
   var gl = cvs.getContext('webgl', { premultipliedAlpha: true, alpha: true }); if (!gl) return null;
@@ -1105,7 +1141,7 @@ function cubitIn(rip, cvs) {
 
 // Cubit at the edge of the screen, once per visit: at a random moment 12 to 32 seconds in, wherever you are on the page,
 // he leans in from the left or right edge at a random height (the trailer's peek), asks to be taken home and leans back
-// out when the clip ends, about 12 seconds later. A click takes you to the Cubit section; the cross sends him away.
+// out when the clip ends, about 12 seconds later. Take me home (or a click on him) goes to the Cubit section; Not now sends him away.
 // He waits while the Cubit section, Install or the buttons up top are on screen, and skips the visit with reduced motion.
 (function () {
   var box = document.getElementById('edge-peek'); if (!box) return;
@@ -1128,6 +1164,9 @@ function cubitIn(rip, cvs) {
     box.style.top = (30 + Math.random() * 40) + '%';
     box.hidden = false;
     cubit = cubitIn(null, cvs); if (!cubit) { box.hidden = true; return; }
+    var bub = box.querySelector('.ep-bubble'), cl = cubitCloud(bub.offsetWidth, bub.offsetHeight, !box.classList.contains('right'));
+    bub.insertAdjacentHTML('afterbegin', cl.svg);
+    bub.firstChild.style.left = -cl.left + 'px'; bub.firstChild.style.top = -cl.up + 'px';
     showing = true;
     cubit.play(SRC, close);
     // He is in by about a second; the bubble goes before he leans back out.
@@ -1139,11 +1178,10 @@ function cubitIn(rip, cvs) {
     timers.forEach(clearTimeout); box.classList.remove('talk'); box.classList.add('gone');
     setTimeout(function () { if (cubit) cubit.stop(); box.hidden = true; }, 300);
   }
-  box.querySelector('.ep-go').addEventListener('click', function (e) {
-    e.preventDefault(); close();
-    document.getElementById('cubit').scrollIntoView({ behavior: 'smooth', block: 'center' });
-  });
-  box.querySelector('.ep-x').addEventListener('click', close);
+  function home(e) { e.preventDefault(); close(); document.getElementById('cubit').scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+  box.querySelector('.ep-go').addEventListener('click', home);
+  box.querySelector('.ep-home').addEventListener('click', home);
+  box.querySelector('.ep-no').addEventListener('click', close);
 })();
 
 </script>
