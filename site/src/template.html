@@ -1142,7 +1142,7 @@ function cubitIn(rip, cvs) {
 // Cubit at the edge of the screen, once per visit: at a random moment 12 to 32 seconds in, wherever you are on the page,
 // he leans in from the left or right edge at a random height (the trailer's peek), asks to be taken home and leans back
 // out when the clip ends, about 12 seconds later. Take me home (or a click on him) goes to the Cubit section; Not now sends him away.
-// He waits while the Cubit section, Install or the buttons up top are on screen, and skips the visit with reduced motion.
+// He waits while the rip in the Cubit section is on screen, and skips the visit with reduced motion.
 (function () {
   var box = document.getElementById('edge-peek'); if (!box) return;
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
@@ -1153,8 +1153,8 @@ function cubitIn(rip, cvs) {
     es.forEach(function (e) { var i = inView.indexOf(e.target); if (e.isIntersecting) { if (i < 0) inView.push(e.target); } else if (i >= 0) inView.splice(i, 1); });
     if (inView.length) close(); else go();
   });
-  // Never over the buttons people came for: the Cubit section, Install, and the Star and Install buttons up top.
-  ['#cubit', '#install', '.intro .cta'].forEach(function (q) { var el = document.querySelector(q); if (el) io.observe(el); });
+  // Only one Cubit at a time: he stays away while the rip is on screen.
+  ['#cubit .rip'].forEach(function (q) { var el = document.querySelector(q); if (el) io.observe(el); });
   timers.push(setTimeout(function () { due = true; go(); }, 12000 + Math.random() * 20000));
   function go() {
     if (!due || done || inView.length) return;
