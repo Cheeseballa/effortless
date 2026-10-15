@@ -1142,11 +1142,14 @@ function cubitIn(rip, cvs) {
 (function () {
   var box = document.getElementById('edge-peek'); if (!box) return;
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  // Once you have seen the rip or clicked him, this browser remembers and he stays home.
+  try { if (localStorage.getItem('cubit-home')) return; } catch (e) {}
+  function home_() { stopped = true; try { localStorage.setItem('cubit-home', '1'); } catch (e) {} }
   var SRC = 'assets/cubit/side-peek-blue-packed.mp4';
   var cvs = box.querySelector('canvas'), due = false, stopped = false, showing = false, cubit = null, inView = [], timers = [];
   var io = new IntersectionObserver(function (es) {
     es.forEach(function (e) { var i = inView.indexOf(e.target); if (e.isIntersecting) { if (i < 0) inView.push(e.target); } else if (i >= 0) inView.splice(i, 1); });
-    if (inView.length) { stopped = true; close(); } else go();
+    if (inView.length) { home_(); close(); } else go();
   });
   // Only one Cubit at a time: he stays away while the rip is on screen.
   ['#cubit .rip'].forEach(function (q) { var el = document.querySelector(q); if (el) io.observe(el); });
@@ -1200,7 +1203,7 @@ function cubitIn(rip, cvs) {
     setTimeout(function () { if (cubit) cubit.stop(); box.hidden = true; }, 300);
     if (!stopped) timers.push(setTimeout(function () { due = true; go(); }, 30000));
   }
-  function home(e) { e.preventDefault(); stopped = true; close(); document.getElementById('cubit').scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+  function home(e) { e.preventDefault(); home_(); close(); document.getElementById('cubit').scrollIntoView({ behavior: 'smooth', block: 'center' }); }
   box.querySelector('.ep-go').addEventListener('click', home);
   box.querySelector('.ep-bubble').addEventListener('click', home);
 })();
