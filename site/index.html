@@ -407,6 +407,7 @@ button.btn:focus-visible,.sel select:focus-visible{outline:2px solid var(--accen
 .edge-peek .ep-x{left:-10px}
 .edge-peek.left .ep-x{left:auto;right:-10px}
 .edge-peek.talk .ep-x{opacity:1}
+@media (max-width:860px){.edge-peek,.edge-peek.left{left:50%;right:auto;bottom:14px;transform:translateX(-50%)}.ep-go,.edge-peek.left .ep-go{flex-direction:column;align-items:center;gap:2px}.edge-peek .rip{width:170px}.ep-bubble{margin-top:0;font-size:16px}.edge-peek .ep-x,.edge-peek.left .ep-x{left:auto;right:-14px;top:-12px;width:32px;height:32px;font-size:18px}}
 @media (prefers-reduced-motion:reduce){.rip.shut{transform:none}.rip.tear,.rip.mend{animation:none}}
 .inst-sec{padding:120px var(--frame) 40px;scroll-margin-top:40px}
 .inst-sec h2{margin:0;font:500 clamp(30px,3.8vw,46px)/1.1 var(--display);letter-spacing:-.02em;color:#f4f2ff}
@@ -1104,13 +1105,13 @@ function cubitIn(rip, cvs) {
   }, { threshold: 0.35 }).observe(rip);
 })();
 
-// Cubit at the edge of the screen, once per visit on a desktop: after 20 seconds or halfway down the page, whichever
-// comes first, a small rip tears open by the side, he rises with "psst… down here", and the rip closes when he has sunk
+// Cubit at the edge of the screen, once per visit: after 20 seconds or halfway down the page, whichever comes first, a
+// small rip tears open by the side (on a phone, at the bottom), he rises with "psst… down here", and the rip closes when he has sunk
 // back. A click takes you to the Cubit section. He waits while the Cubit section or Install is on screen, and skips the
-// visit entirely with reduced motion, on touch screens and in narrow windows.
+// visit entirely with reduced motion.
 (function () {
   var box = document.getElementById('edge-peek'); if (!box) return;
-  if (!matchMedia('(min-width:861px) and (pointer:fine)').matches || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   try { if (sessionStorage.getItem('cubit-peeked')) return; } catch (e) {}
   var rip = box.querySelector('.rip'), cvs = box.querySelector('canvas'), due = false, done = false, showing = false, cubit = null, inView = [];
   var io = new IntersectionObserver(function (es) {
