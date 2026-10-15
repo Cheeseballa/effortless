@@ -399,15 +399,11 @@ button.btn:focus-visible,.sel select:focus-visible{outline:2px solid var(--accen
 .ep-cubit{display:block;height:var(--h);width:calc(var(--h) * 220 / 390)}
 .edge-peek.right .ep-cubit{transform:scaleX(-1)}
 .ep-bubble{position:absolute;top:calc(var(--h) * .02);left:calc(var(--h) * .62);display:flex;flex-direction:column;align-items:center;padding:4px 2px;color:#20232a;font:650 15px/1.2 var(--sans,system-ui);white-space:nowrap;opacity:0;transform:translateY(6px) scale(.92);transform-origin:0 100%;transition:opacity .3s,transform .35s cubic-bezier(.2,1.4,.4,1);pointer-events:none}
-.ep-acts{display:flex;gap:4px;margin-top:8px}
-.ep-acts a,.ep-acts button{height:30px;padding:0 12px;border:0;border-radius:8px;font:600 13px/30px var(--sans,system-ui);cursor:pointer;text-decoration:none}
-.ep-home{background:#2a6f8f;color:#fff}
-.ep-home:hover{background:#235f7b}
 .ep-dot{position:absolute;z-index:-1;border-radius:50%;background:#dfe3eb;filter:drop-shadow(0 6px 12px #0006);pointer-events:none}
 .ep-cloud{position:absolute;z-index:-1;overflow:visible;filter:drop-shadow(0 10px 22px #0007);pointer-events:none}
 .edge-peek.right .ep-bubble{left:auto;right:calc(var(--h) * .62);transform-origin:100% 100%}
-.edge-peek.talk .ep-bubble{opacity:1;transform:none;pointer-events:auto}
-@media (max-width:860px){.edge-peek{--h:min(240px,34vh)}.ep-bubble{font-size:14px}.ep-acts a,.ep-acts button{height:36px;line-height:36px}}
+.edge-peek.talk .ep-bubble{opacity:1;transform:none;pointer-events:auto;cursor:pointer}
+@media (max-width:860px){.edge-peek{--h:min(240px,34vh)}.ep-bubble{font-size:14px}}
 @media (prefers-reduced-motion:reduce){.rip.shut{transform:none}.rip.tear{animation:none}}
 .inst-sec{padding:120px var(--frame) 40px;scroll-margin-top:40px}
 .inst-sec h2{margin:0;font:500 clamp(30px,3.8vw,46px)/1.1 var(--display);letter-spacing:-.02em;color:#f4f2ff}
@@ -781,8 +777,7 @@ button.btn:focus-visible,.sel select:focus-visible{outline:2px solid var(--accen
 <div class="edge-peek" id="edge-peek" hidden>
   <a class="ep-go" href="#cubit" tabindex="-1" aria-hidden="true"><canvas class="ep-cubit" width="220" height="390"></canvas></a>
   <div class="ep-bubble" role="group" aria-label="Cubit">
-    <b>psst, I'm further down</b>
-    <span class="ep-acts"><a class="ep-home" href="#cubit">Hello!</a></span>
+    <b>Pssst, I'm further down!</b>
   </div>
 </div>
 
@@ -1141,7 +1136,7 @@ function cubitIn(rip, cvs) {
 
 // Cubit at the edge of the screen, once per visit: at a random moment 12 to 32 seconds in, wherever you are on the page,
 // he leans in from the left or right edge at a random height (the trailer's peek), asks to be taken home and leans back
-// out when the clip ends, about 12 seconds later. Hello! (or a click on him) goes to the Cubit section.
+// out when the clip ends, about 12 seconds later. A click on him or his cloud goes to the Cubit section.
 // He waits while the rip in the Cubit section is on screen, and skips the visit with reduced motion.
 (function () {
   var box = document.getElementById('edge-peek'); if (!box) return;
@@ -1162,7 +1157,7 @@ function cubitIn(rip, cvs) {
     try { sessionStorage.setItem('cubit-peeked', '1'); } catch (e) {}
     if (Math.random() < 0.5) box.classList.add('right');
     // Below the Cubit section he points the other way.
-    if (document.getElementById('cubit').getBoundingClientRect().bottom < 0) box.querySelector('b').textContent = "psst, I'm further up";
+    if (document.getElementById('cubit').getBoundingClientRect().bottom < 0) box.querySelector('b').textContent = "Pssst, I'm further up!";
     box.hidden = false;
     cubit = cubitIn(null, cvs); if (!cubit) { box.hidden = true; return; }
     var bub = box.querySelector('.ep-bubble'), cl = cubitCloud(bub.offsetWidth, bub.offsetHeight);
@@ -1204,7 +1199,7 @@ function cubitIn(rip, cvs) {
   }
   function home(e) { e.preventDefault(); close(); document.getElementById('cubit').scrollIntoView({ behavior: 'smooth', block: 'center' }); }
   box.querySelector('.ep-go').addEventListener('click', home);
-  box.querySelector('.ep-home').addEventListener('click', home);
+  box.querySelector('.ep-bubble').addEventListener('click', home);
 })();
 
 </script>
