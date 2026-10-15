@@ -292,6 +292,9 @@ body{overflow-x:clip}
 .then code{font:14px var(--mono);color:var(--paper);background:#2e2622;padding:2px 7px;border-radius:5px}
 @media (max-width:720px){.ways{grid-template-columns:minmax(0,1fr)}}
 /* Install, older */
+.chess{padding:40px 0 100px;text-align:center}
+.chess>.lead{margin-left:auto;margin-right:auto}
+.ch-board{display:block;width:min(560px,100%);height:auto;margin:32px auto 0;border-radius:14px;image-rendering:pixelated}
 .install{padding:40px 0 110px}
 
 footer{position:relative;isolation:isolate;overflow:hidden;border-top:1px solid var(--line);padding:34px var(--frame) 0}
@@ -377,9 +380,15 @@ __COMPARE__
     <p class="cb-say" id="cb-say" aria-live="polite">Turn it off at any time.</p>
   </section>
 
+  <section class="chess" id="chess" aria-labelledby="ch-h">
+    <h2 id="ch-h">Play chess against Claude while you wait</h2>
+    <p class="lead">Type <code>/chess claude</code> and a board opens in the chat. Click a piece, then the square it goes to, and Claude answers with its move. <code>/chess</code> plays the computer instead, <code>/chess end</code> closes the board.</p>
+    <img class="ch-board" src="assets/chess.svg" width="560" height="350" alt="The textless chess board in the chat" loading="lazy">
+  </section>
+
   <section class="install" id="install" aria-labelledby="in-h">
     <h2 id="in-h">Install</h2>
-    <p class="lead">textless __VERSION__ is still in testing, so these will work once it is released. It installs from the effortless marketplace and runs on your own Claude login.</p>
+    <p class="lead">textless __VERSION__ installs from the effortless marketplace and runs on your own Claude login.</p>
     __INSTALL__
     <p class="fit">Made for long work turns, when the steps pile up and you only want to know when it is your move. When Claude plans or writes a spec, textless spots it and steps aside, so you can read what you are asked to approve.</p>
   </section>

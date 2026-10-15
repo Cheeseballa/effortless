@@ -9,5 +9,5 @@ rm -rf site/textless && mkdir -p site/textless
 cp -r textless/site/index.html textless/site/market textless/site/settings textless/site/whats-new textless/site/assets site/textless/
 # Leave textless/site as it was built for local work.
 node textless/site/src/build.mjs >/dev/null
-git checkout -q -- textless/site 2>/dev/null || true
+git checkout -q -- textless/site/index.html textless/site/market textless/site/settings textless/site/whats-new 2>/dev/null || true
 echo "built site/textless/"
