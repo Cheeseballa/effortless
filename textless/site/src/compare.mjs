@@ -23,6 +23,7 @@ const I = {
   mic: icon("M8 2.5a2 2 0 0 1 2 2V8a2 2 0 0 1-4 0V4.5a2 2 0 0 1 2-2zM4.5 7.5a3.5 3.5 0 0 0 7 0M8 11v2.5"),
   enter: icon("M12.5 3.5v5h-8M7 6 4.5 8.5 7 11"),
   power: icon("M8 2.5V7M5 4.4a4.5 4.5 0 1 0 6 0"),
+  shrink: icon("M13 3 9.5 6.5M9.5 3.5v3h3M3 13l3.5-3.5M3.5 9.5h3v3"),
   gear: '<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path stroke-width="1.9" d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3" stroke-width="1.9"/></svg>',
 }
 export { I as icons }
@@ -30,7 +31,8 @@ export { I as icons }
 const esc = t => String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
 
 // One chat per pane. In `before`, a step is one of the app's collapsed rows; `say` is Claude talking between steps;
-// `ans` is the final answer. In `after`, the same turn as textless shows it.
+// `ans` is the final answer. In `after`, the same turn as textless shows it: the scene tour in the first chat, a quote,
+// a scene from the Marketplace and a game of chess in the others.
 export const PANES = [
   {
     title: "Working",
@@ -63,7 +65,7 @@ export const PANES = [
       ["step", "Edited login.test.tsx"],
       ["run", "Running npm test -- login (x10)"],
     ],
-    after: [["you", "Fix the flaky login test"], ["card", "1", "Read session.ts"]],
+    after: [["you", "Fix the flaky login test"], ["art", "assets/scenes/quotes/twain-kindness.svg", "Read session.ts"]],
   },
   {
     title: "Working",
@@ -79,10 +81,10 @@ export const PANES = [
       ["step", "Created toCsv.test.ts"],
       ["run", "Running npm test"],
     ],
-    after: [["you", "Add a CSV export to the reports page"], ["card", "2", "Created toCsv.ts"]],
+    after: [["you", "Add a CSV export to the reports page"], ["art", "assets/scenes/scenery/fishing.svg", "From the Marketplace"]],
   },
   {
-    title: "Your turn",
+    title: "Working",
     before: [
       ["you", "Clean up the old date helpers"],
       ["say", "Looking for every place the old helpers are used."],
@@ -91,15 +93,10 @@ export const PANES = [
       ["step", "Read export.ts"],
       ["say", "Two of them are unused. The other three are still used by the export code."],
       ["step", "Edited dates.ts"],
-      ["step", "Ran npx tsc --noEmit"],
-      ["ans", "I removed the two helpers nothing used and the type check passes. The export code still calls three of the old ones in six places. Run the export tests on staging before you merge. Should I move those callers now, or in a follow-up PR?"],
+      ["step", "Edited export.ts"],
+      ["run", "Running npx tsc --noEmit"],
     ],
-    after: [
-      ["you", "Clean up the old date helpers"],
-      ["ans", "I removed the two helpers nothing used and the type check passes. The export code still calls three of the old ones in six places."],
-      ["done", "needs", "6 steps · 48s"],
-      ["asks", [["todo", "Run the export tests on staging before you merge."], ["ask", "Should I move those callers", ["Now", "In a follow-up PR"]]]],
-    ],
+    after: [["you", "Clean up the old date helpers"], ["art", "assets/chess.svg", "Chess against Claude · your move"]],
   },
 ]
 
@@ -113,7 +110,10 @@ function item(it, marks) {
   if (kind === "cut") return `<p class="st cut">${esc(text)}</p>`
   if (kind === "asks") return `<div class="asks">${text.map(([k, q, opts], i) => (i ? '<span class="ask-sep" aria-hidden="true"></span>' : '')
     + `<div class="ask"><b class="ask-n">${i + 1}</b>${k === "ask" ? marks.qbadge : marks.todobadge}<div class="ask-b"><p>${esc(q)}${opts ? "?" : ""}</p>${(opts || []).map((o, j) => `<p class="ask-o"><b>${String.fromCharCode(65 + j)}</b>${esc(o)}</p>`).join("")}</div></div>`).join("")}</div>`
-  if (kind === "card") return `<div class="card"><img class="scene"${text ? "" : ' id="scene"'} data-n="${text || 0}" src="${marks.scene}" alt="A scene while Claude works" width="560" height="350"><p class="busy">Claude is working</p><p class="step" data-n="${text || 0}">${esc(facts || "Edited page.tsx")}</p></div>`
+  // textless's buttons sit in the card's top row: Aa switches it off in this chat, the gear opens settings, the arrows minimize.
+  const top = `<div class="ctl" aria-hidden="true"><b class="aa">Aa</b>${I.gear}${I.shrink}</div>`
+  if (kind === "art") return `<div class="card">${top}<img class="scene fixed" src="${text}" alt="A scene while Claude works" width="560" height="350" loading="lazy"><p class="busy">Claude is working</p><p class="step">${esc(facts)}</p></div>`
+  if (kind === "card") return `<div class="card">${top}<img class="scene"${text ? "" : ' id="scene"'} data-n="${text || 0}" src="${marks.scene}" alt="A scene while Claude works" width="560" height="350"><p class="busy">Claude is working</p><p class="step" data-n="${text || 0}">${esc(facts || "Edited page.tsx")}</p></div>`
   if (kind === "done") {
     const mark = text === "tide" ? `<span class="mark tide" data-seed="7"></span>` : `<span class="mark">${marks[text]}</span>`
     return `<div class="row">${mark}<span class="facts">${esc(facts)}<span>show steps</span></span></div>`
@@ -122,9 +122,7 @@ function item(it, marks) {
 }
 
 function pane(p, side, marks) {
-  const mod = side === "after"
-    ? `<span class="tl" title="textless">${I.power}${I.gear}<b class="aa">Aa</b></span>`
-    : ""
+  const mod = ""
   return `<article class="pane">
   <header class="ph">${I.laptop}<b>${esc(p.title)}</b>${I.chev}<span class="tools">${I.term}${I.folder}${I.dots}${I.close}</span></header>
   <div class="pc">${p[side].map(it => item(it, marks)).join("")}</div>

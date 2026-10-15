@@ -35,17 +35,21 @@ const GLYPHS = {
 
 // The same drawing as pixelWord in register.tsx: each stroke two pixels wide, a darker drop one pixel down, and a
 // leading mark becomes the 9x9 badge with the mark cut out.
-// The controls demo: the prompt bar as the desktop app draws it, textless's three buttons beside the model name.
+// The controls demo: the card's top row as textless draws it, its three buttons at the right, the scene under them and
+// the prompt below, where the commands type themselves.
 function ctrlbar() {
   const I = icons
   return `<div class="cbar" id="strip" data-on="true">
-      <div class="cb-comp"><span class="cb-type" id="cb-type">Type / for commands</span><span class="cb-stop" aria-hidden="true"></span></div>
-      <div class="cb-strip">${I.plus}${I.mic}${I.chev}<span>Auto</span><span class="gap"></span>
-        <span class="cb-tl">
-          <button type="button" class="cb-b" data-power data-tip="power" aria-pressed="true" aria-label="textless on or off in this chat">${I.power}</button>
+      <div class="cb-card">
+        <div class="cb-top"><span class="cb-tl">
+          <button type="button" class="cb-b cb-aa" data-power data-tip="power" aria-pressed="true" aria-label="textless on or off in this chat" title="Orange and struck through while the steps are hidden">Aa</button>
           <button type="button" class="cb-b" data-tip="gear" aria-label="textless settings">${I.gear}</button>
-          <span class="cb-aa aa" title="Orange and struck through while the steps are hidden">Aa</span>
-        </span><span class="model">Opus 5.5</span><span class="fast">Fast</span><span>High</span><span class="ring" aria-hidden="true"></span></div>
+          <button type="button" class="cb-b" data-tip="min" aria-label="Minimize the card">${I.shrink}</button>
+        </span></div>
+        <img class="cb-art" src="assets/scenes/scenery/campfire.svg" alt="" width="560" height="350">
+        <p class="cb-busy">Claude is working</p>
+      </div>
+      <div class="cb-comp"><span class="cb-type" id="cb-type">Type / for commands</span><span class="cb-stop" aria-hidden="true"></span></div>
     </div>
 `
 }
