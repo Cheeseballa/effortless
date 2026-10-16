@@ -96,7 +96,7 @@ export const PANES = [
       ["step", "Edited export.ts"],
       ["run", "Running npx tsc --noEmit"],
     ],
-    after: [["you", "Clean up the old date helpers"], ["art", "assets/chess.svg", "Chess against Claude · your move"]],
+    after: [["you", "Clean up the old date helpers"], ["art", "assets/chess.webp", "Chess against Claude · your move"]],
   },
 ]
 
