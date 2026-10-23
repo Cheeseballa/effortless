@@ -1,5 +1,10 @@
 [
   {
+    "version": "1.71.1",
+    "date": "2026-10-23",
+    "note": "Band fits the app's new frame: glow spans the band, shorter cold line when narrow"
+  },
+  {
     "version": "1.71.0",
     "date": "2026-10-11",
     "note": "Works properly in the terminal, and updates without the CLI on PATH",
