@@ -1,7 +1,7 @@
 import { describe, expect, mock, test as baseTest } from 'claude-code/testing'
 import type { On } from 'claude-code'
 import type { Engine } from 'claude-code/testing'
-import { floorIn, helperFloor, namedEffort, hotVisible, looksLikeRedo, REDO_STAY_PROMPTS, routeWorth, syncPlan, tipped, bounded, handoffEvidence, parseHandoffAnswer, withJevKey, parseVerdict, capped, resetLabel, HANDOFF_PROMPT, handoffMessage, withAttachments, endsOnQuestion, keepsEffort, benchGrade, benchReport, judgeFailure, contextFrom, readConfig, asSpent, cacheColor, cacheLabel, cacheClock, cacheSafe, cacheTtlOf, mostlyCached, isFollowUp, parseJevAnswer, parseJevKey, savedText, forkOutcome, setupNext, setupBack, setupCounter, dashboardLines, flashColor, handoffGlowStep, weighted, handoffLook, isNewer, latestRelease, updateSnoozed, updateFailure, claudeCandidates, noClaudeHint, compactTranscript, judgeGlowSvg, judgeGlowAt, judgeBrightnessAt, JUDGE_RISE_MS, JUDGE_FADE_MS, JUDGE_STEP_MS, JUDGE_PIECE_MS } from '../hooks/register'
+import { floorIn, helperFloor, namedEffort, hotVisible, looksLikeRedo, REDO_STAY_PROMPTS, routeWorth, priceAt, MODEL_PRICE, READ_SHARE, HAIKU_LONG_PROMPT, syncPlan, tipped, bounded, handoffEvidence, parseHandoffAnswer, withJevKey, parseVerdict, capped, resetLabel, HANDOFF_PROMPT, handoffMessage, withAttachments, endsOnQuestion, keepsEffort, benchGrade, benchReport, judgeFailure, contextFrom, readConfig, asSpent, cacheColor, cacheLabel, cacheClock, cacheSafe, cacheTtlOf, mostlyCached, isFollowUp, parseJevAnswer, parseJevKey, savedText, forkOutcome, setupNext, setupBack, setupCounter, dashboardLines, flashColor, handoffGlowStep, weighted, handoffLook, isNewer, latestRelease, updateSnoozed, updateFailure, claudeCandidates, noClaudeHint, compactTranscript, judgeGlowSvg, judgeGlowAt, judgeBrightnessAt, JUDGE_RISE_MS, JUDGE_FADE_MS, JUDGE_STEP_MS, JUDGE_PIECE_MS } from '../hooks/register'
 import { ART_COLUMNS, artFrame, artPixel, MOVING } from '../hooks/art'
 import { isLight, lightHex, lightProps, setLight, setTheme, themedEls, themedSvg, tint, tintHex } from '../hooks/theme'
 import { importsOf, moduleLinks, moduleOf, relPath, withTouch } from '../hooks/agents'
@@ -159,16 +159,42 @@ describe('auto', () => {
 
   test('routeWorth: a switch to a cold model pays only when it still comes out cheaper', () => {
     const big = 100_000
-    // Opus chat, cache warm: a cold Sonnet writes the whole chat and costs more; a warm Sonnet is far cheaper.
+    // Opus chat, cache warm: a cold Sonnet writes the whole chat and costs more; a warm Sonnet is cheaper.
     expect(routeWorth('sonnet', 'opus', big, { to: false, inUse: true })).toBe(false)
     expect(routeWorth('sonnet', 'opus', big, { to: true, inUse: true })).toBe(true)
-    // A cold Haiku writes the whole chat (a third of the price, 1.25 times) against a warm Opus read (twice the price, a tenth): still more.
-    expect(routeWorth('haiku', 'opus', big, { to: false, inUse: true })).toBe(false)
+    // A cold Haiku writes the whole chat ($0.20 per million) for what a warm Opus read costs ($0.20): a tie, and the cheaper model takes it.
+    expect(routeWorth('haiku', 'opus', 80_000, { to: false, inUse: true })).toBe(true)
+    expect(routeWorth('haiku', 'opus', big, { to: false, inUse: true })).toBe(true)
     expect(routeWorth('haiku', 'opus', big, { to: true, inUse: true })).toBe(true)
     // The chat's own cache gone cold: staying would write it all again on Opus, so Sonnet wins even cold.
     expect(routeWorth('sonnet', 'opus', big, { to: false, inUse: false })).toBe(true)
     // No context size known: route as before.
     expect(routeWorth('sonnet', 'opus', 0, { to: false, inUse: true })).toBe(true)
+  })
+
+  test('routeWorth: over 100,000 tokens Haiku costs five times as much, so a cold Haiku loses to a warm chat', () => {
+    const long = HAIKU_LONG_PROMPT + 1
+    // The write is $1 per million there, against a warm read of $0.20 on Opus or Fable and $0.10 on Sonnet.
+    expect(routeWorth('haiku', 'opus', long, { to: false, inUse: true })).toBe(false)
+    expect(routeWorth('haiku', 'fable', long, { to: false, inUse: true })).toBe(false)
+    expect(routeWorth('haiku', 'sonnet', long, { to: false, inUse: true })).toBe(false)
+    // A warm Haiku reads at $0.05 per million even there, and a cold chat would be written again at $8: both still move.
+    expect(routeWorth('haiku', 'opus', long, { to: true, inUse: true })).toBe(true)
+    expect(routeWorth('haiku', 'opus', long, { to: false, inUse: false })).toBe(true)
+    // Up to the line, a cold Haiku loses only to a warm Sonnet, whose read ($0.10) is half its write ($0.20).
+    expect(routeWorth('haiku', 'sonnet', 80_000, { to: false, inUse: true })).toBe(false)
+    expect(routeWorth('haiku', 'fable', 80_000, { to: false, inUse: true })).toBe(true)
+  })
+
+  test('the price table is the pricing page of 2026-11-14, in dollars per million tokens', () => {
+    const SONNET_INPUT = 2
+    const dollars = (m: 'haiku' | 'sonnet' | 'opus' | 'fable', tokens = 1) => priceAt(m, tokens) * SONNET_INPUT
+    expect((['haiku', 'sonnet', 'opus', 'fable'] as const).map(m => dollars(m))).toEqual([0.1, 2, 4, 8])
+    expect(dollars('haiku', HAIKU_LONG_PROMPT)).toBe(0.1)
+    expect(dollars('haiku', HAIKU_LONG_PROMPT + 1)).toBe(0.5)
+    expect(dollars('opus', 500_000)).toBe(4)
+    // A cache read: Haiku $0.01, Sonnet $0.10, Opus $0.20, Fable $0.20.
+    expect((['haiku', 'sonnet', 'opus', 'fable'] as const).map(m => +(MODEL_PRICE[m] * SONNET_INPUT * READ_SHARE[m]).toFixed(4))).toEqual([0.01, 0.1, 0.2, 0.2])
   })
 
   test('a prompt the judge calls simple runs on Haiku 5.5; the next hard one is back on the chat model', { options: { modelAuto: 'on' } } as never, async ($, on) => {
@@ -613,11 +639,11 @@ describe('footer text', () => {
     await $.prompt.submit({ text: 'hej', wait: false, origin: { kind: 'composer' } })
     await step($, 'high')
 
-    // 100 in + 800 written x1.25 + 10000 read x0.1 + 600 out x5 = 100 + 1000 + 1000 + 3000 = 5100.
+    // 100 in + 800 written x1.25 + 10000 read x0.05 + 600 out x5 = 100 + 1000 + 500 + 3000 = 4600.
     const text = await asked($)
-    expect(text).toContain('1 prompts, 1 requests, cost about 5.1k')
-    expect(text).toContain('cache reads 20 %, cache writes 20 %, output 59 %')
-    expect(text).toContain('Low 1, average 5.1k')
+    expect(text).toContain('1 prompts, 1 requests, cost about 4.6k')
+    expect(text).toContain('cache reads 11 %, cache writes 22 %, output 65 %')
+    expect(text).toContain('Low 1, average 4.6k')
     expect(text).toContain('Judge: Jev 0, Haiku 1')
     expect(text).not.toContain('saved about')
   })
@@ -2753,10 +2779,10 @@ describe('dashboard', () => {
     // Sonnet has never answered: its cache is cold, and writing 100k tokens there costs more than reading them on Opus.
     await ask('{"model":"sonnet","effort":"low","why":"small fix"}', 'rename this variable to userId')
     expect(sent.at(-1)).toBe('claude-opus-5-5')
-    // A cold Haiku loses to a warm Opus read as well, whatever the size of the chat.
+    // A cold Haiku writes 100k tokens for what the warm Opus read costs, and all the rest is cheaper there: it moves.
     await mocked.advance(30 * 60_000)
     await ask('{"model":"haiku","effort":"low","why":"lookup"}', 'what is the folder called')
-    expect(sent.at(-1)).toBe('claude-opus-5-5')
+    expect(sent.at(-1)).toBe('claude-haiku-5-5')
     // An hour and more on, the Opus cache is cold too: staying would write it all again, so Sonnet is worth it now.
     await mocked.advance(61 * 60_000)
     await ask('{"model":"sonnet","effort":"low","why":"small fix"}', 'add a log line here')
@@ -3022,7 +3048,7 @@ describe('dashboard', () => {
     expect(dashboardLines({ ...base, last: { cost: 42_000, ms: 38_200 } }).detail).toBe('Jev: a small fix · last reply ≈42.0k tokens · 38s')
     expect(dashboardLines({ ...base, auto: false }).head).toBe(`✦ Off · cache ${cacheLabel(42)} · 18% context`)
     expect(dashboardLines({ ...base, cacheNow: null, contextPercent: null }).head).toBe('✦ Medium')
-    expect(weighted({ input_tokens: 10, output_tokens: 2, cache_read_input_tokens: 1000, cache_creation_input_tokens: 4 })).toBe(10 + 10 + 100 + 5)
+    expect(weighted({ input_tokens: 10, output_tokens: 2, cache_read_input_tokens: 1000, cache_creation_input_tokens: 4 })).toBe(10 + 10 + 50 + 5)
   })
 
   test('the effort word and the figures after it are drawn apart, so the figures can be cut and the word stays whole', () => {

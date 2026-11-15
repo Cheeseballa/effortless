@@ -16,10 +16,12 @@ export const MODELS: { key: ModelKey; label: string; long: string; id: string }[
   { key: 'fable', label: 'Fable', long: 'Fable 5.1', id: 'claude-fable-5-1' },
 ]
 export const EFFORTS: Effort[] = ['low', 'medium', 'high', 'xhigh', 'max']
-// What one token costs relative to an uncached input token, the same ratios on every Claude model. Measured over
-// 80k requests of real Claude Code use, cache reads are about 76% of a session's cost, cache writes 16% and output 8%: effort
-// mostly changes how many tool calls a prompt makes, not what one answer writes, so all four are counted.
-const WEIGHT = { input: 1, write: 1.25, read: 0.1, out: 5 }
+// What one token costs relative to an uncached input token. Writes and output are the same ratios on every Claude model;
+// a cache read is not (see READ_SHARE), so the stats, which do not know the model, count it at the Opus 5.5 and Sonnet 5.5
+// share. Measured over 80k requests of real Claude Code use when a read was still a tenth, cache reads were about 76% of a
+// session's cost, cache writes 16% and output 8%: effort mostly changes how many tool calls a prompt makes, not what one
+// answer writes, so all four are counted.
+const WEIGHT = { input: 1, write: 1.25, read: 0.05, out: 5 }
 // Changing effort between two requests keeps the prompt cache on these models only. On Fable 5.1 and older Opus
 // the next request rewrote 56-100% of the cache (measured), which costs more than any effort can save.
 export const cacheSafe = (modelId: string) => /(opus|sonnet)-5-5/.test(modelId)
@@ -2318,21 +2320,33 @@ export function routeTo(verdict: ModelKey, inUse: ModelKey): ModelKey | null {
   return MODEL_RANK.indexOf(verdict) < MODEL_RANK.indexOf(inUse) ? verdict : null
 }
 
-// What one input token costs on each model, in Sonnet's price: Opus about 2x (measured: the same prompt cost 1.97x on Opus), Haiku about a third. These are the ratios
-// the savings estimate uses; they only have to be right enough to tell which side of a switch is cheaper.
-export const MODEL_PRICE: Record<ModelKey, number> = { haiku: 1 / 3, sonnet: 1, opus: 2, fable: 5 }
+// What one input token costs on each model, in Sonnet's price, from Anthropic's pricing page on 2026-11-14 (dollars per
+// million input tokens: Haiku 5.5 0.10, Sonnet 5.5 2, Opus 5.5 4, Fable 5.2 8). The savings estimate uses these ratios.
+export const MODEL_PRICE: Record<ModelKey, number> = { haiku: 0.05, sonnet: 1, opus: 2, fable: 4 }
+// Haiku 5.5 is priced by prompt length: a request whose prompt is over this many tokens, cached ones included, pays five
+// times as much for every kind of token.
+export const HAIKU_LONG_PROMPT = 100_000
+export const HAIKU_LONG_PRICE = 0.25
+// What a cache read costs as a share of that model's input price.
+export const READ_SHARE: Record<ModelKey, number> = { haiku: 0.1, sonnet: 0.05, opus: 0.05, fable: 0.025 }
+/** What one input token costs on a model, in Sonnet's price, in a request whose prompt is this long. */
+export function priceAt(model: ModelKey, promptTokens: number): number {
+  return model === 'haiku' && promptTokens > HAIKU_LONG_PROMPT ? HAIKU_LONG_PRICE : MODEL_PRICE[model]
+}
 /**
- * Whether sending this one prompt to a cheaper model pays. The chat's context is read from the cache (a tenth of the input
- * price) where that model's cache is warm, and written to it (1.25 times) where it is cold. A switch to a cold model
- * writes the whole context first, which can cost more than staying on the chat's own warm one at a low effort.
+ * Whether sending this one prompt to a cheaper model pays. The chat's context is read from the cache (READ_SHARE of the
+ * input price) where that model's cache is warm, and written to it (twice the input price) where it is cold. A switch to a
+ * cold model writes the whole context first, which can cost more than staying on the chat's own warm one. On a tie the
+ * cheaper model wins: the prompt's new tokens, its output and every later request of the prompt cost less there.
  */
 export function routeWorth(to: ModelKey, inUse: ModelKey, contextTokens: number, warm: { to: boolean; inUse: boolean }): boolean {
   if (!(contextTokens > 0)) return true
-  // Claude Code writes the 1-hour cache, which costs twice the input price (measured), not the 5-minute 1.25.
+  // Claude Code writes the 1-hour cache, which costs twice the input price on every model, not the 5-minute 1.25.
   const write = 2
-  const stay = contextTokens * MODEL_PRICE[inUse] * (warm.inUse ? WEIGHT.read : write)
-  const move = contextTokens * MODEL_PRICE[to] * (warm.to ? WEIGHT.read : write)
-  return move < stay
+  const stay = contextTokens * priceAt(inUse, contextTokens) * (warm.inUse ? READ_SHARE[inUse] : write)
+  const move = contextTokens * priceAt(to, contextTokens) * (warm.to ? READ_SHARE[to] : write)
+  // The margin keeps a true tie a tie whatever order the sums were rounded in.
+  return move <= stay * (1 + 1e-9)
 }
 // Until when each model's prompt cache is warm for this chat: set by every main response on it.
 const warmUntil: Partial<Record<ModelKey, number>> = {}
