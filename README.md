@@ -1,3 +1,9 @@
+> **This is a fork.** effortless is made by [HeyCubit](https://github.com/HeyCubit/effortless) and released under the
+> MIT License (see [LICENSE](LICENSE)). This copy is a small group's own version, numbered with `-hub` at the end. It
+> differs from the original in its model price table and in benchmark 3, both brought up to date on 2026-11-14; the
+> rest is in the git history. For the original, use the install steps below. For this copy, run
+> `claude plugin marketplace add Cheeseballa/effortless` and then `claude plugin install effortless@effortless`.
+
 <h3 align="center">Two mods for Claude Code, by HeyCubit</h3>
 
 <table>
