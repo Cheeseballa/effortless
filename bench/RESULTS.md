@@ -57,26 +57,55 @@ Every run: `bench/results/agentic-2026-10-10.md` and `.json`.
 
 Prompts and labels: `bench/judge-cases.json`.
 
-## 3. Why model switching is off (`node bench/quality.mjs`)
+## 3. Why model switching is off (`node bench/quality.mjs`, `node bench/chat-switch.mjs`)
 
-An earlier version also moved simple prompts to Haiku or Sonnet. This benchmark measured the answers: 30 self-contained prompts, each answered on Opus and on the model and effort a router would pick (Haiku low for easy, Sonnet medium for normal, Opus high for hard), compared by a blind grader (Opus, high effort). Run 2026-10-09, one run each.
+**Cheaper model when it can** moves a simple prompt to Haiku or Sonnet. Two things decide whether that is worth it: are the cheaper answers good enough, and what does the move cost in a real chat. Both were measured again on 2026-11-14 on Opus 5.5, Sonnet 5.5 and Haiku 5.5, one run each.
 
-| Against Opus medium | Routed good enough | Baseline cost | Routed cost | Saved |
+Dollars in this section are worked out from the tokens each request reported and the list prices on Anthropic's pricing page on 2026-11-14. The `claude` CLI's own cost figure is not used: it does not know Haiku 5.5 and prices it as Opus. The CLI's `haiku` shortcut also still answers with Haiku 4.5, so both scripts ask for Haiku 5.5 by its full name.
+
+### Are the cheaper answers good enough?
+
+30 self-contained prompts, each answered on Opus high and on the model and effort a router would pick (Haiku low for easy, Sonnet medium for normal, Opus high for hard), compared by a blind grader (Opus, high effort).
+
+| Against Opus high | Routed as good or better | Routed good enough | Baseline cost | Routed cost | Saved |
+| --- | --- | --- | --- | --- | --- |
+| easy (12, Haiku low) | 25% | 92% | $0.121 | $0.003 | 98% |
+| normal (12, Sonnet medium) | 58% | 100% | $0.373 | $0.109 | 71% |
+| hard (6, same model) | 100% | 100% | $0.996 | $0.996 | 0% |
+| all (30) | 53% | 97% | $1.490 | $1.107 | 26% |
+
+- The grader preferred the Opus answer in 9 of 12 easy prompts and 5 of 12 normal ones, and never preferred the cheaper answer. Mostly Opus was more complete, not more correct.
+- "Good enough" means a person who got only the cheaper answer would not need to ask again and would not be misled. That held for 29 of 30.
+- The one miss was on Haiku: a PowerShell line count that silently skips blank lines, with no warning.
+- In October's run the easy prompts were good enough in 83% (10 of 12) and saved 78%.
+
+### What does the move cost in a real chat?
+
+Each model keeps its own prompt cache. A prompt moved to another model has to write the whole chat into that model's cache first, at twice the input price (Claude Code writes the 1-hour cache: every write in these runs was a 1-hour one). The next prompt on that model reads it from the cache.
+
+A chat was built on Opus from one long message, then the same short question was asked in a fork of it on each model. Every answer was right.
+
+| One simple prompt | 95,000-token chat | Against staying | 118,000-token chat | Against staying |
 | --- | --- | --- | --- | --- |
-| easy (12) | 75% | $0.124 | $0.029 | 77% |
-| normal (12) | 100% | $0.284 | $0.115 | 60% |
-| hard (6, routed to Opus high) | 100% | $0.714 | $0.903 | -26% |
-| all (30) | 90% | $1.121 | $1.046 | 7% |
+| stay on warm Opus (mean of 2) | $0.0225 | 1x | $0.0271 | 1x |
+| move to Haiku, cold | $0.0191 | 0.85x | $0.1183 | 4.4x |
+| move to Haiku, warm | $0.0010 | 0.04x | $0.0061 | 0.23x |
+| move to Sonnet, cold | $0.3818 | 17x | $0.4734 | 17.5x |
+| move to Sonnet, warm | $0.0105 | 0.47x | $0.0128 | 0.47x |
 
-| Against Opus high | Routed good enough | Baseline cost | Routed cost | Saved |
-| --- | --- | --- | --- | --- |
-| easy (12) | 83% | $0.126 | $0.028 | 78% |
-| normal (12) | 100% | $0.329 | $0.113 | 66% |
-| hard (6, same model) | 100% | $1.164 | $1.164 | 0% |
-| all (30) | 93% | $1.620 | $1.306 | 19% |
+- **Haiku, chat up to 100,000 tokens:** the first prompt on a cold Haiku costs a little less than staying, and every prompt after it costs about a 25th.
+- **Haiku, chat over 100,000 tokens:** Haiku 5.5 charges five times as much there, so the first prompt costs about 4.4 times what staying does. By these figures it is paid back after about 5 more prompts on Haiku.
+- **Sonnet:** the first prompt costs 17 times what staying does, and each later one saves about a cent. It takes about 30 prompts on Sonnet to pay that back.
 
-Those prompts started with no chat history, and that is what made the switch look cheap. In a real chat the context sits in the chat model's prompt cache, and each model keeps its own. A prompt moved to another model has to write the whole chat into that model's cache first, at twice the input price (Claude Code writes the 1-hour cache). Measured on 2026-10-10 with an 80k-token chat: from a warm Opus chat, one prompt on Haiku costs about 5 times what staying on Opus does, and about 10 times on Sonnet. Switching only pays once the chat model's cache has gone cold, or for a long run of prompts on the cheaper model.
+On 2026-10-10 the same measurement on an 80k-token chat found Haiku at about 5 times the cost of staying and Sonnet at about 10 times. Haiku 5.5's list price is now far lower, and effortless's own price table was out of date; it was corrected in the same change as this run.
 
-So "Cheaper model when it can" is off by default since 1.68.9 and marked experimental. The saving that holds up in a real chat is effort: benchmark 1.
+Limits:
+- One run, one question, a chat made of one long message. A real chat has many turns and tool calls.
+- The dollars are tokens times list price, not a bill. That Haiku 5.5 costs five times as much over 100,000 tokens is taken from the pricing page, not measured.
+- Not measured: the chat going back to Opus afterwards, and the Opus cache running out while prompts are on Haiku.
+- The quality prompts start with no chat history. How well Haiku answers a simple prompt deep in a long chat was checked only by the one sum above.
+- One grader, one run: the percentages can move by a prompt or two.
 
-Details per case: `bench/results/quality-202610091528.md` (vs high) and `quality-202610091911-vs-opus-medium.md`, with the .json beside each.
+**Cheaper model when it can** is still off by default and marked experimental. These runs say a move to Haiku in a chat under 100,000 tokens now pays, at the price of answers that are good enough but usually less complete; a move to Sonnet does not, unless many prompts in a row stay there.
+
+Details: `bench/results/quality-202611150335.md`, `chat-switch-95000-202611150329.md` and `chat-switch-120000-202611150330.md`, with the .json beside each. October's runs: `quality-202610091528.md` (vs high) and `quality-202610091911-vs-opus-medium.md`.

@@ -43,7 +43,7 @@ it is built for. effortless uses it in three places:
 | | |
 |---|---|
 | **The judge** | reads each prompt and picks the effort, in about a second, on your own Claude login |
-| **Cheaper model when it can** | experimental, off by default. When on, a prompt the judge calls simple may run on Haiku 5.5 (or Sonnet), never above your chat's model, but only when the switch pays: each model keeps its own prompt cache, so in a chat that is in use the switch usually costs more than it saves ([why](#why-model-switching-is-off)) |
+| **Cheaper model when it can** | experimental, off by default. When on, a prompt the judge calls simple may run on Haiku 5.5 (or Sonnet), never above your chat's model, but only when the switch pays: each model keeps its own prompt cache, so in a chat that is in use a switch to Sonnet usually costs more than it saves, and one to Haiku pays only while the chat is under 100,000 tokens ([why](#why-model-switching-is-off)) |
 | **Compaction** | every compaction, `/compact` and the automatic one included, is summarized by Haiku 5.5. If Haiku fails, Claude Code compacts as usual |
 
 The cheaper model is switched on in Settings → Model; compaction is switched in Settings → Handoff → Compact with.
@@ -167,11 +167,18 @@ all numbers and limits are in [bench/RESULTS.md](bench/RESULTS.md).
 
 ## Why model switching is off
 
-Moving a simple prompt to Haiku looks cheap on a single prompt: the cheaper answers were good enough in 27 of 30 and
-cost 60 to 77% less. But each model keeps its own prompt cache, so a prompt moved mid-chat has to write the whole chat
-into the other model's cache first. Measured on an 80k-token chat, that costs about 5 times what staying on a warm
-Opus does (10 times for Sonnet). So **Cheaper model when it can** is off by default and marked experimental.
-[Details](bench/RESULTS.md#3-why-model-switching-is-off-node-benchquality-mjs).
+**Cheaper model when it can** moves a simple prompt to Haiku or Sonnet. Measured again on 2026-11-14 on today's models:
+
+- **Answer quality:** the cheaper answers were good enough in 29 of 30 prompts, but a blind grader preferred the Opus
+  answer in 14 of the 24 that were moved and never the cheaper one. The one miss was on Haiku.
+- **Cost in a real chat:** each model keeps its own prompt cache, so a moved prompt first writes the whole chat into the
+  other model's cache. From a warm Opus chat of 95,000 tokens, the first prompt on Haiku 5.5 cost 0.85 times what staying
+  does and the next one 0.04 times. Over 100,000 tokens Haiku costs five times as much, and the first prompt cost 4.4
+  times what staying does. On Sonnet the first prompt cost 17 times as much at either size.
+
+So a move to Haiku now pays in a chat under 100,000 tokens, with answers that are good enough but usually less complete.
+The setting is still off by default and marked experimental: this was one run on one made-up chat.
+[Details](bench/RESULTS.md#3-why-model-switching-is-off-node-benchqualitymjs-node-benchchat-switchmjs).
 
 ## How often the judge is right
 

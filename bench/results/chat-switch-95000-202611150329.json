@@ -1,0 +1,93 @@
+[
+ {
+  "step": "build the chat on opus",
+  "session": "7b34d632-827e-49a1-99ff-817df3ae1b3b",
+  "model": "claude-opus-5-5",
+  "answer": "OK",
+  "ms": 2256,
+  "input": 2,
+  "write": 95169,
+  "write1h": 95169,
+  "read": 0,
+  "out": 4,
+  "cost": 0.76144
+ },
+ {
+  "step": "stay on opus, 1",
+  "session": "6f00f7f6-8929-426c-919f-4e9a6748f743",
+  "model": "claude-opus-5-5",
+  "answer": "391",
+  "ms": 1717,
+  "input": 2,
+  "write": 654,
+  "write1h": 654,
+  "read": 94739,
+  "out": 3,
+  "cost": 0.0242478
+ },
+ {
+  "step": "stay on opus, 2",
+  "session": "b76fb800-a5d2-4a44-9153-1f9ce57ad83c",
+  "model": "claude-opus-5-5",
+  "answer": "391",
+  "ms": 1742,
+  "input": 2,
+  "write": 193,
+  "write1h": 193,
+  "read": 95203,
+  "out": 3,
+  "cost": 0.020652600000000004
+ },
+ {
+  "step": "move to haiku, cold",
+  "session": "cd999a69-df73-4265-a6db-1abb7279c74a",
+  "model": "claude-haiku-5-5",
+  "answer": "391",
+  "ms": 2629,
+  "input": 2,
+  "write": 95434,
+  "write1h": 95434,
+  "read": 0,
+  "out": 3,
+  "cost": 0.0190885
+ },
+ {
+  "step": "move to haiku, warm",
+  "session": "f0730aab-c49f-49bb-9b80-c5ad0ff4a100",
+  "model": "claude-haiku-5-5",
+  "answer": "391",
+  "ms": 2109,
+  "input": 2,
+  "write": 235,
+  "write1h": 235,
+  "read": 95203,
+  "out": 3,
+  "cost": 0.00100073
+ },
+ {
+  "step": "move to sonnet, cold",
+  "session": "e39e0e52-931c-489f-b465-fad3745703e9",
+  "model": "claude-sonnet-5-5",
+  "answer": "391",
+  "ms": 1602,
+  "input": 2,
+  "write": 95447,
+  "write1h": 95447,
+  "read": 0,
+  "out": 3,
+  "cost": 0.381822
+ },
+ {
+  "step": "move to sonnet, warm",
+  "session": "819cc9f8-1ea5-46fb-a9ca-69e25587b039",
+  "model": "claude-sonnet-5-5",
+  "answer": "391",
+  "ms": 1627,
+  "input": 2,
+  "write": 248,
+  "write1h": 248,
+  "read": 95203,
+  "out": 3,
+  "cost": 0.010546300000000002
+ }
+]

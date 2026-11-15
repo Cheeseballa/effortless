@@ -19,9 +19,24 @@ const BASE = flag('base', 'opus:high').split(':')
 
 const cases = JSON.parse(readFileSync(join(here, 'quality-cases.json'), 'utf8')).cases.filter(c => !only?.length || only.includes(c.id))
 
+// The CLI's `haiku` shortcut still answers with Haiku 4.5, so Haiku is asked for by its full name.
+const MODEL_ID = { haiku: 'claude-haiku-5-5' }
+// Dollars per million tokens (input, 1-hour cache write, cache read, output), from Anthropic's pricing page on 2026-11-14.
+// The cost is worked out from the tokens each answer reports: the CLI's own total_cost_usd does not know Haiku 5.5 and
+// prices it as Opus. Haiku 5.5 costs five times as much in a request whose prompt is over 100,000 tokens.
+const PRICE = { haiku: [0.1, 0.2, 0.01, 0.5], sonnet: [2, 4, 0.1, 10], opus: [4, 8, 0.2, 20], fable: [8, 16, 0.2, 40] }
+export function costOf(modelId, u = {}) {
+  const key = Object.keys(PRICE).find(k => modelId.includes(k))
+  if (!key) return NaN
+  const input = u.input_tokens ?? 0, write = u.cache_creation_input_tokens ?? 0, read = u.cache_read_input_tokens ?? 0, out = u.output_tokens ?? 0
+  const times = key === 'haiku' && input + write + read > 100_000 ? 5 : 1
+  const [pi, pw, pr, po] = PRICE[key]
+  return times * (input * pi + write * pw + read * pr + out * po) / 1e6
+}
+
 function ask(model, effort, prompt) {
   return new Promise((resolve, reject) => {
-    const argv = ['-p', '--model', model, '--effort', effort, '--no-session-persistence', '--disable-slash-commands', '--tools', '',
+    const argv = ['-p', '--model', MODEL_ID[model] ?? model, '--effort', effort, '--no-session-persistence', '--disable-slash-commands', '--tools', '',
       '--system-prompt', 'You are a helpful assistant.', '--strict-mcp-config', '--setting-sources', '', '--output-format', 'json']
     const p = spawn('claude', argv, { cwd: tmpdir(), shell: process.platform === 'win32' ? false : false })
     let out = '', err = ''
@@ -32,7 +47,7 @@ function ask(model, effort, prompt) {
         const j = JSON.parse(out)
         if (j.is_error) return reject(new Error(j.result))
         const resolved = Object.keys(j.modelUsage ?? {})[0] ?? model
-        resolve({ text: j.result, cost: j.total_cost_usd ?? 0, ms: j.duration_ms ?? 0, resolved, out: j.usage?.output_tokens ?? 0 })
+        resolve({ text: j.result, cost: costOf(resolved, j.usage), ms: j.duration_ms ?? 0, resolved, out: j.usage?.output_tokens ?? 0 })
       } catch { reject(new Error(`bad output: ${out.slice(0, 200)} ${err.slice(0, 200)}`)) }
     })
     p.stdin.end(prompt)
