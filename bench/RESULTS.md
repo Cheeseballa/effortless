@@ -106,6 +106,8 @@ Limits:
 - The quality prompts start with no chat history. How well Haiku answers a simple prompt deep in a long chat was checked only by the one sum above.
 - One grader, one run: the percentages can move by a prompt or two.
 
-**Cheaper model when it can** is still off by default and marked experimental. These runs say a move to Haiku in a chat under 100,000 tokens now pays, at the price of answers that are good enough but usually less complete; a move to Sonnet does not, unless many prompts in a row stay there.
+These runs say a move to Haiku in a chat under 100,000 tokens now pays, at the price of answers that are good enough but usually less complete; a move to Sonnet does not, unless many prompts in a row stay there. The saving is small: staying cost about 2 cents a simple prompt.
+
+This fork took **Cheaper model when it can** out of the settings on 2026-11-14, after these runs: a saved "on" is ignored and every prompt runs on the chat's own model. The routing code and its cost sums are still in `hooks/register.tsx`, unused, so the original's updates still merge. In the original the setting is off by default and marked experimental.
 
 Details: `bench/results/quality-202611150335.md`, `chat-switch-95000-202611150329.md` and `chat-switch-120000-202611150330.md`, with the .json beside each. October's runs: `quality-202610091528.md` (vs high) and `quality-202610091911-vs-opus-medium.md`.

@@ -1,7 +1,8 @@
 > **This is a fork.** effortless is made by [HeyCubit](https://github.com/HeyCubit/effortless) and released under the
 > MIT License (see [LICENSE](LICENSE)). This copy is a small group's own version, numbered with `-hub` at the end. It
 > differs from the original in its model price table and in benchmark 3, both brought up to date on 2026-11-14; the
-> rest is in the git history. For the original, use the install steps below. For this copy, run
+> rest is in the git history. It also has no **Cheaper model when it can** setting: see
+> [why](#why-model-switching-is-off). For the original, use the install steps below. For this copy, run
 > `claude plugin marketplace add Cheeseballa/effortless` and then `claude plugin install effortless@effortless`.
 
 <h3 align="center">Two mods for Claude Code, by HeyCubit</h3>
@@ -49,10 +50,9 @@ it is built for. effortless uses it in three places:
 | | |
 |---|---|
 | **The judge** | reads each prompt and picks the effort, in about a second, on your own Claude login |
-| **Cheaper model when it can** | experimental, off by default. When on, a prompt the judge calls simple may run on Haiku 5.5 (or Sonnet), never above your chat's model, but only when the switch pays: each model keeps its own prompt cache, so in a chat that is in use a switch to Sonnet usually costs more than it saves, and one to Haiku pays only while the chat is under 100,000 tokens ([why](#why-model-switching-is-off)) |
 | **Compaction** | every compaction, `/compact` and the automatic one included, is summarized by Haiku 5.5. If Haiku fails, Claude Code compacts as usual |
 
-The cheaper model is switched on in Settings → Model; compaction is switched in Settings → Handoff → Compact with.
+Compaction is switched in Settings → Model → Compact with.
 
 ## Install
 
@@ -182,8 +182,9 @@ all numbers and limits are in [bench/RESULTS.md](bench/RESULTS.md).
   does and the next one 0.04 times. Over 100,000 tokens Haiku costs five times as much, and the first prompt cost 4.4
   times what staying does. On Sonnet the first prompt cost 17 times as much at either size.
 
-So a move to Haiku now pays in a chat under 100,000 tokens, with answers that are good enough but usually less complete.
-The setting is still off by default and marked experimental: this was one run on one made-up chat.
+So a move to Haiku now pays in a chat under 100,000 tokens, but it saves a cent or two on a simple prompt and gives
+answers that are good enough but usually less complete. This fork took the setting out on 2026-11-14: every prompt runs
+on the chat's own model, and only effort changes. The original still has it, off by default and marked experimental.
 [Details](bench/RESULTS.md#3-why-model-switching-is-off-node-benchqualitymjs-node-benchchat-switchmjs).
 
 ## How often the judge is right

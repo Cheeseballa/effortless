@@ -189,16 +189,11 @@ const settingsCard = atom({ plugin: 'effortless', key: 'settingsCard' } as const
 /** The settings panel's parts: a card each on the overview, and what the part is for, said once it is open. */
 const CARDS: readonly { id: SettingsCard; title: string; about: string }[] = [
   { id: 'effort', title: 'Effort', about: 'How hard Claude thinks. The slider tips close calls; Min and Max are hard limits.' },
-  { id: 'model', title: 'Model', about: "Whether a simple prompt may run on a cheaper model, and which model writes a compaction." },
+  { id: 'model', title: 'Model', about: 'Which model writes a compaction.' },
   { id: 'handoff', title: 'Handoff & alerts', about: 'The full handoff skill, when to suggest compacting, and which alerts show.' },
   { id: 'show', title: 'Customize', about: 'How effortless looks and which parts it shows. Uninstall removes it.' },
   { id: 'judge', title: 'Judge', about: 'Haiku judges prompts and handoffs. Add Jev for quicker effort calls. Test checks it answers.' },
 ]
-// The Model card: the two ways to run. Effort follows the judge in both.
-const MODEL_CHOICES = [
-  { value: 'on', label: 'Cheaper when it can', tag: 'experimental', about: "A simple prompt may run on Haiku or Sonnet. Rarely pays: the other model has to reread the whole chat." },
-  { value: 'off', label: "Always the chat's", tag: '', about: "Every prompt keeps the model you picked. Only effort changes." },
-] as const
 const BIAS_WORDS = ['Cheapest', 'Cheaper', 'Balanced', 'Smarter', 'Smartest'] as const
 // The settings panel's judge test: running, or what it found. Null before a test and once the panel closes.
 const judgeTest = atom({ plugin: 'effortless', key: 'judgeTest' } as const, null)
@@ -684,9 +679,10 @@ export function readConfig(options: unknown): JudgeConfig {
     layout: str(o.layout) === 'minimal' ? 'minimal' : 'default',
     compactWith: str(o.compactWith) === 'session' ? 'session' : 'haiku',
     handoffButton: str(o.handoffButton) === 'always' ? 'always' : 'advised',
-    // Off unless switched on: one prompt on another model rewrites the whole chat into that model's cache, which costs
-    // more than it saves in a chat that is in use (measured 2026-10-10).
-    modelAuto: str(o.modelAuto) === 'on' ? 'on' : 'off',
+    // Always off in this fork: "Cheaper model when it can" was taken out of the settings on 2026-11-14. It saved a cent or
+    // two on a simple prompt and gave thinner answers (bench/RESULTS.md, section 3). A saved 'on' is ignored. The routing
+    // code below is left as it is, unused, so the original's updates still merge.
+    modelAuto: 'off',
     helpers: str(o.helpers) === 'on' ? 'on' : 'off',
     theme: THEMES.find(t => t === str(o.theme)) ?? 'violet',
     appearance: (['dark', 'light'] as const).find(a => a === str(o.appearance)) ?? 'auto',
@@ -4614,7 +4610,7 @@ Saved to ${out}.md and .json` }
       const judgeName = shown.judge === 'haiku' ? 'Haiku' : hasKey || shown.judge === 'jev' ? 'Haiku + Jev' : 'Haiku'
       const summaries: Record<SettingsCard, string> = {
         effort: `${BIAS_WORDS[shown.bias + 2]} · ${shown.floor} to ${shown.ceiling}${shown.helpers === 'on' ? ' · helpers' : ''}`,
-        model: shown.modelAuto === 'on' ? 'Cheaper when it can' : "Always the chat's",
+        model: shown.compactWith === 'haiku' ? 'Compacts with Haiku 5.5' : "Compacts with the chat's model",
         judge: tested && tested.ok !== null ? `${judgeName} · ${tested.ok ? 'working' : 'failing'}` : judgeName,
         handoff: `${shown.handoffSkill ? `/${shown.handoffSkill}` : 'Built in'} · compact alert at ${shown.swampAt}%`,
         show: `${shown.layout === 'minimal' ? 'Minimal' : 'Dashboard'} · ${2 - ['timer', 'reason'].filter(h => hidden.includes(h)).length} of 2 on`,
@@ -4867,19 +4863,10 @@ Saved to ${out}.md and .json` }
             ...(tested && tested.ok !== null
               ? [<Text key="settings-judge-result" color={tested.ok ? '#7fd49b' : '#ff8a80'}>{`${tested.ok ? '✓' : '✗'} ${tested.text}`}</Text>]
               : []),
-]) : card === 'model' ? (bare ? [] : MODEL_CHOICES.map(c => (
-            <Box key={`model-${c.value}`} flexDirection="column" flexGrow={1} flexShrink={1} minWidth={26}>
-              <Box flexDirection="row" gap={1} alignItems="center">
-                <Button key={`settings-model-${c.value}`} plain label={`${shown.modelAuto === c.value ? '◉' : '○'} ${c.label}`} onPress={() => set('modelAuto')(c.value)} />
-                {/* A warning in the cache countdown's yellow: this choice rarely pays. */}
-                {c.tag ? <Text key={`model-tag-${c.value}`} color={YELLOW} bold>{`⚠ ${c.tag}`}</Text> : null}
-              </Box>
-              <Text dimColor wrap="wrap">{c.about}</Text>
-            </Box>
-          )).concat([
-            // Which model writes a compaction's summary: a model choice, so it sits with the others.
+]) : card === 'model' ? (bare ? [] : [
+            // Which model writes a compaction's summary.
             pick({ key: "settings-compact-with", label: "Compact with", value: shown.compactWith, options: [{ value: 'haiku', label: 'Haiku 5.5' }, { value: 'session', label: "Chat's model" }], onSelect: set('compactWith') }),
-          ])) : card === 'handoff' ? (bare ? [] : [
+          ]) : card === 'handoff' ? (bare ? [] : [
             pick({ key: "settings-skill", label: "Handoff skill", value: shown.handoffSkill || '-', options: [
                 { value: '-', label: 'effortless (built in)' },
                 ...[...new Set([...(shown.handoffSkill ? [shown.handoffSkill] : []), ...skillNames])].map(name => ({ value: name, label: `/${name}` })),

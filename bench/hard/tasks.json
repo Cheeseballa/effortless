@@ -105,8 +105,7 @@
     "replace": "const stay = contextTokens * priceAt(inUse, contextTokens) * (warm.to ? READ_SHARE[inUse] : write)",
     "report": "With model Auto on, effortless moves prompts to a cheaper model even when that model's prompt cache is cold and the chat is big, while my main model's cache is still warm. That writes the whole chat into the cold cache and costs more than staying would. It should only switch when the switch comes out cheaper.",
     "fails": [
-      "auto > routeWorth: a switch to a cold model pays only when it still comes out cheaper",
-      "dashboard > cache-aware routing, live through the hooks: a cold Sonnet is skipped on a big warm Opus chat, Haiku moves, a cold chat moves, and a routed reply leaves the countdown alone"
+      "auto > routeWorth: a switch to a cold model pays only when it still comes out cheaper"
     ]
   },
   {
